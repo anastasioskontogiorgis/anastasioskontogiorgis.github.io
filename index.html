@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anastasios Kontogiorgis — Data Scientist · PhD in AI</title>
+<meta name="description" content="Data scientist working across marketing analytics, fraud &amp; risk, and applied machine learning, with a PhD in AI (multi-agent reinforcement learning). Live projects, published research, deployed services.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <a class="brand" href="index.html">
+    <!-- TODO: PHOTO add my professional photo to replace the monogram
+         <span class="avatar"><img src="assets/portrait.jpg" alt="Anastasios Kontogiorgis"></span> -->
+    <span class="avatar">AK</span>
+    <span>Anastasios Kontogiorgis</span>
+  </a>
+  <nav class="site">
+    <a href="#projects">Projects</a>
+    <a href="uav.html">UAV Swarm</a>
+    <a href="research.html">Research</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+<section class="hero">
+  <p class="eyebrow">Data Scientist · PhD in Artificial Intelligence</p>
+  <h1>Anastasios Kontogiorgis</h1>
+  <span class="decode" id="decode" data-text="From complex data to reliable AI signals"></span>
+  
+  <p class="lede">
+  I am a data scientist and artificial intelligence researcher specialising in multi-agent reinforcement 
+  learning. I have over seven years of experience across marketing, e-commerce, and fraud risk analysis, 
+  combining industry application with academic research through a PhD from Trinity College Dublin (submitted May 2026).
+</p>
+
+<p class="lede">
+  My doctoral research focuses on channel-robust emergent communication, specifically
+  mitigating channel distortions via reliability-aware graph attention layers. This novel
+  framework was advanced during a research internship at the University
+  of Oslo's Department of Informatics, supervised by Prof. Eric Jul. There I
+  developed an autoencoder-based mechanism for estimating communication channel
+  reliability, and co-authored a systematic taxonomy of noise in multi-agent
+  reinforcement learning, currently under review at <em>JAAMAS</em>.
+</p>
+
+<p class="lede">
+  My work emphasises methodological rigor: identifying baseline failure modes,
+  diagnosing dataset biases, and measuring performance against grounded evaluation protocols.
+</p>
+ 
+  <p class="meta">Based in Czechia · EU citizen · open to remote &amp; EU-wide roles</p>
+
+  <div class="linkrow">
+    <a href="https://github.com/anastasioskontogiorgis">GitHub</a>
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a>
+    <a href="https://linkedin.com/in/anastasios-kontogiorgis-830a23434">LinkedIn</a>
+    <!-- <a href="mailto:">Email</a> -->
+    <a href="contact" id="email-link">Email</a>
+    <a href="/assets/Anastasios_Kontogiorgis_CV.pdf" download="Anastasios_Kontogiorgis_CV.pdf">Download CV</a>
+  </div>
+
+  <hr class="channel" aria-hidden="true">
+</section>
+
+<section id="projects">
+  <h2>Projects</h2>
+  
+ <p class="lede">
+  The selection below contains a dedicated research and publications overview, an active adaptation of my NoisyGraph emergent-   communication model to UAV swarms, and four completed projects covering causal inference, statistical forensics, content recommendation using dense embeddings, and production machine learning.
+</p>
+
+  <!-- Project 1 -->
+  <div class="project">
+    <div class="pmeta">
+      <div class="status">Live demo</div>
+      <div class="metric">subject-share@5<br>0.128 → 0.292<br>(lexical → semantic)</div>
+    </div>
+    <div>
+      <h3>Semantic Book Recommender</h3>
+      <p>
+        An end-to-end redesign of a content-based book recommender. Diagnostic analysis of an earlier iteration uncovered a silent pandas indexing fault that misaligned title vectors across 99.9% of the 236,280-book catalog, leaving only 1 in roughly 989 unaffected. The modernised pipeline enriches 15,000 records via the Open Library API, replacing lexical TF-IDF matching with dense MiniLM sentence embeddings and FAISS vector indexing. This architecture increased subject-relevance retrieval 2.3-fold over the lexical baseline and 14.6-fold over an empirical random floor..
+      </p>
+      <ul class="tags"><li>Python</li><li>sentence-transformers</li><li>FAISS</li><li>Gradio</li><li>Open Library API</li></ul>
+      <p class="plinks">
+        <a href="book.html">Project page &amp; results →</a>
+        <a href="https://anastasios-k-book-recommender.hf.space/">Live demo</a>
+        <a href="https://github.com/anastasioskontogiorgis/book-recommender">Code</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Project 2 -->
+  <div class="project">
+    <div class="pmeta">
+      <div class="status">Complete</div>
+      <div class="metric">true uplift +4.2%<br>estimated +4.6%<br>naïve +45% / +44%</div>
+    </div>
+    <div>
+      <h3>Campaign Uplift &amp; Causal Inference</h3>
+      <p>
+        Observational pre-post comparisons often confuse baseline market trends with true campaign impact. This project isolates causal uplift by constructing synthetic controls via structural time-series models, validated against GBDT and autoregressive baselines. Synthetic stress-testing verified the model's accuracy (+4.62% estimated vs. +4.21% ground truth), against naïve before-and-after and year-on-year comparisons reporting +44.8% and +43.7% respectively. Applied to live retail data, placebo tests exposed treatment selection bias, allowing the impact to be rigorously framed as an operational upper bound.
+      </p>
+      <ul class="tags"><li>Python</li><li>statsmodels</li><li>CausalImpact</li><li>LightGBM</li><li>causal inference</li><li>time series</li></ul>
+      <p class="plinks">
+        <a href="campaign.html">Project page &amp; results →</a>
+        <a href="https://github.com/anastasioskontogiorgis/campaign-uplift-causal-impact">Code</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Project 3 -->
+  <div class="project">
+    <div class="pmeta">
+      <div class="status wip">Ongoing research</div>
+      <div class="metric">Phase 1.5 of 7<br>3 of 4 seeds cluster<br>diagnosed 3 causes</div>
+    </div>
+    <div>
+      <h3>UAV Emergent-Communication Swarm</h3>
+      <p>
+        An active extension of my doctoral NoisyGraph framework, evaluating whether a channel-robust emergent-communication
+        architecture can generalise from the constrained geometry of an intersection to a mobile swarm. The UAV swarm must cover an unknown area while maintaining
+	link topology under unreliable communication conditions. In the current phase, four seeded runs 
+	demonstrate that the architecture does not transfer unchanged. While a staged reward curriculum improves swarm dispersion to a 73.2% coverage peak, 
+	performance collapses late in training. Diagnostic analysis isolated two root causes: unconstrained policy updates and a checkpointing criterion that
+	 selected for unstable performance spikes over balanced trajectories, each pointing to a specific 
+	architectural change for the next phase. 
+      </p>
+      <ul class="tags"><li>PyTorch</li><li>multi-agent RL</li><li>graph attention</li><li>emergent communication</li><li>reward design</li></ul>
+      <p class="plinks">
+        <a href="uav.html">Project page &amp; phase results →</a>
+        <a href="https://github.com/anastasioskontogiorgis/uav-emergent-swarm">Code</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Project 4 -->
+  <div class="project">
+    <div class="pmeta">
+      <div class="status">Live site</div>
+      <div class="metric">77% fraud labels<br>driven by dataset<br>leakage artefacts</div>
+    </div>
+    <div>
+      <h3>Ethereum Fraud &amp; Data Forensic Analytics</h3>
+      <p>
+        An exploratory and statistical analysis investigating address behaviour on the Ethereum blockchain using non-parametric hypothesis testing and multivariable logistic regression. Data forensic checks identified two prominent label-leakage artefacts—accounting for 77% of target labels—where structural missingness (e.g., absent ERC-20 transfer logs) directly correlated with fraud class assignments. The resulting documentation establishes corrected baselines for predictive modelling on public benchmark data.
+      </p>
+      <ul class="tags"><li>R</li><li>Python</li><li>Quarto</li><li>statistical inference</li><li>logistic regression</li></ul>
+      <p class="plinks">
+        <a href="https://anastasioskontogiorgis.github.io/ethereum-fraud-analysis/">Live site</a>
+        <a href="https://github.com/anastasioskontogiorgis/ethereum-fraud-analysis">Code</a>
+      </p>
+    </div>
+  </div>
+
+  <!-- Project 5 -->
+  <div class="project">
+    <div class="pmeta">
+      <div class="status">Deployable service</div>
+      <div class="metric">held-out F1 0.972<br>modern-mail acc 0.833<br>era controls 1.000</div>
+    </div>
+    <div>
+      <h3>Production Phishing Detection Service</h3>
+      <p>
+        A containerised FastAPI service for phishing classification, built alongside rigorous evaluation protocols. Deduplicating the training corpus prior to splitting eliminated a data leakage 	path that artificially inflated accuracy by 0.5%. Inspecting feature coefficients revealed that legitimate emails were partly identified by historical provenance; when evaluated against a 	contemporary test set, accuracy dropped from 0.980 to 0.833 while class separation contracted by two-thirds. The deployed service returns calibrated probabilities for flexible thresholding 		and logs privacy-preserving prediction metrics to detect real-world drift.
+      </p>
+      <ul class="tags"><li>scikit-learn</li><li>FastAPI</li><li>Docker</li><li>calibration</li><li>monitoring</li></ul>
+      <p class="plinks">
+        <a href="phishing.html">Project page &amp; results →</a>
+        <a href="https://github.com/anastasioskontogiorgis/phishing-detection-pipeline">Code</a>
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="research-teaser">
+  <h2>Research</h2>
+  <p class="section-note" style="margin-bottom:1rem">
+    My doctoral research addresses a real-world challenge in multi-agent systems: maintaining coordinated behaviour when 
+	communication channels are noisy or lossy. I developed <strong>NoisyGraph</strong>, a framework integrating geometry-driven
+	network topology, autoencoder-based message reliability scoring within graph attention layers, and post-training channel 
+	calibration. Evaluated on connected autonomous vehicle environments, the architecture sustains coordination as the channel 
+	degrades. Whether that behaviour transfers to a mobile topology the agents must maintain themselves is the open question 
+	the UAV continuation investigates. This work comprises two peer-reviewed publications and a comprehensive survey under
+	review at <em>JAAMAS</em>.
+  </p>
+  <p class="plinks">
+    <a href="research.html">Research overview →</a>
+    <a href="uav.html">UAV continuation</a>
+    <a href="https://github.com/anastasioskontogiorgis/channel-robust-emergent-communication">Benchmark code</a>
+    <a href="https://ceur-ws.org/Vol-3813/5.pdf">ATT'24 paper (open access)</a>
+  </p>
+</section>
+</main>
+
+<footer class="site" id="contact">
+  <span>Anastasios Kontogiorgis · © 2026</span>
+  <span>
+    <!-- <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> · -->
+    <a href="contact" id="email-link">Email</a> ·
+    <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a> ·
+    <a href="/assets/Anastasios_Kontogiorgis_CV.pdf" download="Anastasios_Kontogiorgis_CV.pdf">Download CV</a>
+  </span>
+</footer>
+
+<script>
+/* Spam protection */
+  document.getElementById('email-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    const user = 'anastasioskontogiorgis';
+    const domain = 'gmail.com';
+    window.location.href = 'mailto:' + user + '@' + domain;
+  });
+</script>
+
+</div>
+
+<script>
+/* Hero decode: the tagline resolves from channel noise into clean signal.
+   Skipped (rendered instantly) when the visitor prefers reduced motion. */
+(function () {
+  var el = document.getElementById('decode');
+  if (!el) return;
+  var target = el.getAttribute('data-text');
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    el.textContent = target; return;
+  }
+  var glyphs = '#%&/\\|<>+=*·:;~^';
+  var reveal = 0, tick = 0;
+  function frame() {
+    tick++;
+    if (tick % 2 === 0 && reveal < target.length) reveal++;
+    var out = target.slice(0, reveal);
+    var rest = '';
+    for (var i = reveal; i < target.length; i++) {
+      var c = target[i];
+      rest += (c === ' ') ? ' ' : glyphs[(Math.random() * glyphs.length) | 0];
+    }
+    el.innerHTML = out + (rest ? '<span class="n">' + rest + '</span>' : '');
+    if (reveal < target.length) requestAnimationFrame(frame);
+    else el.textContent = target;
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

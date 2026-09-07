@@ -1,0 +1,187 @@
+/* ==========================================================================
+   Anastasios Kontogiorgis — portfolio
+   Design tokens: cool lab-paper base, deep navy ink (matches the CV/brand),
+   one warm signal accent used sparingly. Type: Space Grotesk (display),
+   Source Serif 4 (body prose), IBM Plex Mono (data, tags, eyebrows).
+   Signature: the "noisy channel" motif — a dashed line resolving into a
+   solid one, and a hero line that decodes from noise on load.
+   ========================================================================== */
+
+:root {
+  --paper: #f6f7f5;
+  --card: #ffffff;
+  --ink: #182635;
+  --navy: #1f3864;
+  --signal: #b96a1e;      /* warm accent — links on hover, small highlights */
+  --noise: #8b94a3;       /* grey-blue for "noise" states and secondary text */
+  --line: #dcdfe2;
+  --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display: "Space Grotesk", system-ui, sans-serif;
+  --body: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --measure: 44rem;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 1.075rem;
+  line-height: 1.65;
+}
+
+.wrap { max-width: 62rem; margin: 0 auto; padding: 0 1.25rem; }
+
+a { color: var(--navy); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+a:hover { color: var(--signal); }
+:focus-visible { outline: 2px solid var(--signal); outline-offset: 3px; border-radius: 2px; }
+
+/* ------------------------------- header -------------------------------- */
+header.site {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.4rem 0 1.2rem;
+}
+.brand { display: flex; align-items: center; gap: .7rem; text-decoration: none; color: var(--ink); }
+.brand:hover { color: var(--ink); }
+.avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--navy); color: #fff;
+  display: grid; place-items: center;
+  font: 600 0.95rem var(--display); letter-spacing: .02em;
+  overflow: hidden; flex: none;
+}
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.brand span { font: 500 1rem var(--display); }
+nav.site a { font: 500 .9rem var(--display); margin-left: 1.4rem; text-decoration: none; }
+nav.site a:hover { text-decoration: underline; }
+
+/* -------------------------------- hero --------------------------------- */
+.hero { padding: 4.5rem 0 3.2rem; }
+.eyebrow {
+  font: 500 .74rem var(--mono);
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--noise); margin: 0 0 .9rem;
+}
+.hero h1 {
+  font: 700 clamp(2.1rem, 5.4vw, 3.4rem)/1.08 var(--display);
+  letter-spacing: -0.015em; margin: 0 0 .8rem;
+}
+.decode {
+  display: block;
+  font: 500 clamp(1.15rem, 2.6vw, 1.5rem)/1.3 var(--display);
+  color: var(--navy);
+  min-height: 1.4em;
+  margin: 0 0 1.6rem;
+}
+.decode .n { color: var(--noise); }   /* still-noisy glyphs during decode */
+
+/* the channel: dashed noise on the left resolving into solid signal */
+.channel {
+  height: 3px; border: 0; margin: 2.2rem 0;
+  background:
+    repeating-linear-gradient(90deg, var(--noise) 0 7px, transparent 7px 16px)
+      left / 52% 100% no-repeat,
+    linear-gradient(var(--navy), var(--navy)) right / 47% 100% no-repeat;
+}
+
+.hero p.lede { max-width: var(--measure); margin: 0 0 1rem; }
+.hero p.meta { font: 400 .92rem var(--mono); color: var(--noise); margin: 1.4rem 0 0; }
+
+.linkrow { margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: .55rem; }
+.linkrow a {
+  font: 500 .85rem var(--display);
+  border: 1px solid var(--line); background: var(--card);
+  padding: .42rem .8rem; border-radius: 999px; text-decoration: none;
+}
+.linkrow a:hover { border-color: var(--signal); }
+
+/* ------------------------------ sections ------------------------------- */
+section { padding: 2.6rem 0; }
+h2 {
+  font: 700 1.5rem var(--display); letter-spacing: -0.01em;
+  margin: 0 0 .4rem;
+}
+.section-note { color: var(--noise); font-size: .98rem; max-width: var(--measure); margin: 0 0 2rem; }
+
+/* --------------------------- project entries ---------------------------
+   Not a card grid: a "case file" list. The left column carries verified,
+   audited numbers in mono — structure encoding what this portfolio is
+   about (claims that were measured, not asserted).                        */
+.project {
+  display: grid; grid-template-columns: 12.5rem 1fr; gap: 1.6rem;
+  padding: 1.7rem 0; border-top: 1px solid var(--line);
+}
+.project:last-of-type { border-bottom: 1px solid var(--line); }
+.pmeta .status {
+  font: 500 .7rem var(--mono); letter-spacing: .13em; text-transform: uppercase;
+  color: var(--signal);
+}
+.pmeta .status.wip { color: var(--noise); }   /* not-yet-live projects read quiet, not active */
+.pmeta .metric {
+  font: 400 .82rem/1.55 var(--mono); color: var(--ink);
+  margin-top: .6rem; white-space: pre-line;
+}
+.project h3 { font: 600 1.22rem var(--display); margin: 0 0 .45rem; }
+.project p { margin: 0 0 .8rem; max-width: var(--measure); }
+.tags { margin: 0 0 .9rem; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: .4rem; }
+.tags li {
+  font: 400 .76rem var(--mono); color: var(--noise);
+  border: 1px solid var(--line); border-radius: 6px; padding: .14rem .5rem;
+}
+.plinks a { font: 500 .9rem var(--display); margin-right: 1.2rem; }
+
+/* --------------------------- research article --------------------------- */
+article.research { max-width: var(--measure); margin: 0 auto; padding-bottom: 3rem; }
+article.research h1 {
+  font: 700 clamp(1.9rem, 4.5vw, 2.7rem)/1.12 var(--display);
+  letter-spacing: -0.015em; margin: .4rem 0 .6rem;
+}
+article.research .standfirst { font-size: 1.15rem; color: var(--navy); font-style: italic; }
+article.research h2 { margin-top: 2.6rem; }
+article.research h3 { font: 600 1.1rem var(--display); margin: 1.8rem 0 .4rem; }
+article.research figure { margin: 2rem 0; }
+article.research figure img {
+  width: 100%; height: auto; display: block;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--card);
+}
+article.research figcaption { font: 400 .85rem/1.5 var(--mono); color: var(--noise); margin-top: .55rem; }
+
+/* two animations side by side, stacking on narrow screens */
+article.research figure.pair .frames {
+  display: grid; grid-template-columns: 1fr 1fr; gap: .8rem;
+}
+article.research figure.pair .frames figcaption {
+  margin-top: .4rem; text-align: center;
+}
+article.research ul.pubs { list-style: none; padding: 0; }
+article.research ul.pubs li { margin: 0 0 1rem; padding-left: 1rem; border-left: 3px solid var(--line); }
+article.research ul.pubs li strong { font-family: var(--display); }
+.backlink { font: 500 .9rem var(--display); }
+
+/* -------------------------------- footer -------------------------------- */
+footer.site {
+  border-top: 1px solid var(--line); margin-top: 3rem;
+  padding: 1.8rem 0 2.6rem;
+  font: 400 .88rem var(--mono); color: var(--noise);
+  display: flex; flex-wrap: wrap; gap: .8rem 2rem; justify-content: space-between;
+}
+footer.site a { color: var(--noise); }
+footer.site a:hover { color: var(--signal); }
+
+/* ------------------------------ responsive ------------------------------ */
+@media (max-width: 700px) {
+  article.research figure.pair .frames { grid-template-columns: 1fr; }
+  .project { grid-template-columns: 1fr; gap: .7rem; }
+  .pmeta { display: flex; align-items: baseline; gap: 1rem; }
+  .pmeta .metric { margin-top: 0; }
+  nav.site a { margin-left: .9rem; }
+  .hero { padding-top: 3rem; }
+}

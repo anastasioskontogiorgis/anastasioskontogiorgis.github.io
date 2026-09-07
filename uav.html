@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UAV Emergent-Communication Swarm — Anastasios Kontogiorgis</title>
+<meta name="description" content="An ongoing research project extending channel-robust emergent communication from connected autonomous vehicles to a UAV swarm covering unknown terrain. Phase 1.5 examines why the policy reaches dispersed configurations and does not retain them.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <a class="brand" href="index.html">
+    <span class="avatar">AK</span>
+    <span>Anastasios Kontogiorgis</span>
+  </a>
+  <nav class="site">
+    <a href="index.html#projects">Projects</a>
+    <a href="research.html">Research</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+<article class="research">
+  <p class="eyebrow">Ongoing research project · Phases 0, 1, and 1.5 complete (7 planned)</p>
+  <h1>UAV Emergent-Communication Swarm</h1>
+  <p class="standfirst">
+    An empirical investigation into whether learned multi-agent emergent communication architectures generalise to unconstrained spatial environments. This project extends the NoisyGraph framework to an autonomous unmanned aerial vehicle (UAV) swarm executing area coverage under dynamic, agent-maintained network topologies.
+  </p>
+  <p class="meta" style="font:400 .9rem var(--mono); color:var(--noise)">
+    <a href="https://github.com/anastasioskontogiorgis/uav-emergent-swarm">Code &amp; phase writeups</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/uav-emergent-swarm/blob/main/docs/design.md">Design document</a> ·
+    <a href="research.html">Underlying doctoral research</a>
+  </p>
+
+  <hr class="channel" aria-hidden="true">
+
+  <h2>Research Motivation</h2>
+  <p>
+    My doctoral thesis introduced <strong>NoisyGraph</strong>, a graph neural network framework designed to maintain multi-agent coordination under communication channel degradation. While originally validated on connected autonomous vehicles navigating unsignalised intersections, the underlying theoretical architecture was designed to be environment-agnostic.
+  </p>
+  <p>
+    This project empirically evaluates that domain-generalisation claim in a spatial environment with fundamentally different constraints. A swarm of autonomous drones must coordinate to cover unknown terrain without centralised infrastructure or pre-defined communication topologies. Agents move freely in continuous space, causing the communication graph to dynamically fragment and re-form based on proximity. The research is conducted in modular phases to systematically isolate architectural performance, multi-objective trade-offs, and training dynamics.
+  </p>
+
+  <h2>Environment &amp; Task Formulation</h2>
+  <p>
+    The benchmark task evaluates five UAV agents initialised in a central cluster within a <math><mn>24</mn><mtext>m</mtext><mo>×</mo><mn>24</mn><mtext>m</mtext></math> continuous bounded plane over a 60-timestep horizon. The objective formulation introduces fundamental tension across three optimisation targets:
+  </p>
+  <p>
+    Maximising area coverage requires spatial agent dispersal; maintaining network connectivity requires agents to remain within a <math><mn>6</mn><mtext>m</mtext></math> communication radius; and spatial proximity introduces collision risks. Because no spatial configuration can simultaneously maximise all three objectives, the policy must discover an optimal Pareto trade-off.
+  </p>
+  <p>
+    To rigorously evaluate emergent communication, individual agents operate under partial observability: each agent receives only its local kinematics (position, velocity, boundary distance) and a localised spatial grid patch beneath its sensor payload. Global teammate locations are strictly withheld, forcing spatial awareness to emerge entirely via learned message passing across the communication network.
+  </p>
+
+  <figure>
+    <img src="assets/uav/environment.png" alt="Schematic of the coverage environment: a 24-metre square with five drones clustered at the centre, their circular sensor footprints, the covered-cell grid, the nine discrete actions and the 34-value observation vector.">
+    <figcaption>
+      Coverage environment schematic. Area coverage is discretised on a 1-meter grid and recorded when crossed by an agent's sensor footprint. Joint credit allocation divides reward for simultaneously explored cells, removing incentives for redundant formation flying over previously visited terrain.
+    </figcaption>
+  </figure>
+
+  <p>
+    Two communication paradigms are benchmarked: <strong>CommNet</strong>, a broadcast architecture relying on global average message pooling, and <strong>NoisyGraph</strong>, which constructs dynamic spatial adjacency graphs at each timestep and routes representations via graph attention across variable-depth relay chains.
+  </p>
+
+  <h2>Phase 1: Baseline Architecture Benchmarking</h2>
+  <p>
+    The NoisyGraph prototype was evaluated across four independent training runs with identical hyperparameter configurations, varying only the random seed initialisation. Three of the four seeds converged to a local optimum characterised by policy collapse: agents remained tightly clustered near the origin, preserving 100% network connectivity but restricting spatial coverage to 21%–35%. Only a single seed successfully learned a dispersed strategy, achieving 53.2% area coverage.
+  </p>
+
+  <figure class="pair">
+    <div class="frames">
+      <div>
+        <img src="assets/uav/swarm_noisygraph_s2.gif" alt="Animation of the NoisyGraph swarm trained with seed 2: five drones remain clustered near the centre of the map for the whole episode, their communication links permanently connected, covering very little ground.">
+        <figcaption>Seed 2 — Clustered policy (21.6% coverage)</figcaption>
+      </div>
+      <div>
+        <img src="assets/uav/swarm_noisygraph.gif" alt="Animation of the NoisyGraph swarm trained with seed 0: the drones spread outward across the map, their communication links repeatedly breaking and reforming, covering roughly half the area.">
+        <figcaption>Seed 0 — Dispersed policy (53.2% coverage)</figcaption>
+      </div>
+    </div>
+    <figcaption>
+      Evaluation of identical NoisyGraph configurations across initialisation seeds. Navy edges denote a fully connected 5-agent communication graph; grey edges indicate network fragmentation. The clustered policy prioritises topological static connectivity at the expense of exploration, whereas the dispersed policy accepts network disconnections to maximise area coverage.
+    </figcaption>
+  </figure>
+
+  <p>
+    Averaged across seeds, NoisyGraph achieved <strong>35.1% mean coverage compared to 33.2% for a random policy baseline</strong> (<math><mi>σ</mi><mo>=</mo><mn>13.3</mn><mo>%</mo></math>), while exhibiting higher collision frequencies in 75% of runs. These initial results indicated that the unadjusted prototype failed to reliably outperform random action selection.
+  </p>
+  <p>
+    Crucially, empirical reward analysis revealed that clustered policies earned significantly lower cumulative returns (<math><mo>−</mo><mn>70</mn></math> to <math><mo>−</mo><mn>100</mn></math> per episode) than the dispersed policy (<math><mo>+</mo><mn>2</mn></math> to <math><mo>+</mo><mn>11</mn></math>). This gradient trajectory demonstrates that clustering was not an intentional Pareto choice endorsed by the reward function, but rather an optimisation pathology where policy updates became trapped in sub-optimal local minima.
+  </p>
+
+  <h2>Phase 1.5: Policy Optimisation Dynamics &amp; Stability</h2>
+  <p>
+    Two primary hypotheses were framed to explain the clustering failure mode: local collision penalty avoidance driving policies toward static, low-risk trajectories, or temporal credit assignment failure where immediate proximity penalties dominated delayed exploration rewards.
+  </p>
+  <p>
+    Incorporating entropy regularisation and reward normalisation enabled the swarm to discover spatial dispersal without a curriculum, attaining <strong>59.0% area coverage by epoch 73</strong> with under 4 collisions per episode. However, subsequent policy iterations suffered catastrophic collapse, reverting entirely to clustered configurations by epoch 101. This established that the primary optimisation challenge was not exploration efficiency, but policy update stability within the multi-agent optimisation landscape.
+  </p>
+  <p>
+    To mitigate gradient instability, a staged reward curriculum was introduced: training exclusively on spatial coverage for 100 epochs, introducing collision penalties at epoch 100, and enforcing connectivity penalties at epoch 200. This curriculum stabilized the dispersed configuration significantly, maintaining an average of <strong>57.4% coverage and 8.7 collisions per episode</strong> across epochs 111–430 (peaking at 73.2% coverage). Late-stage policy collapse was deferred until epoch 440.
+  </p>
+
+  <figure>
+    <img src="assets/uav/curriculum.png" alt="Coverage and connectivity across 465 training epochs under the staged curriculum, with the collision and connectivity penalties entering at epochs 100 and 200.">
+    <figcaption>
+      Training trajectories under the staged curriculum. Area coverage (navy) expands rapidly upon collision penalty introduction at epoch 100 and stabilizes across mid-stage training. Connectivity uptime (orange) remains low as agents systematically sacrifice graph density to maximise spatial coverage.
+    </figcaption>
+  </figure>
+
+  <p>
+    While the curriculum extended stability, diagnostic evaluation confirmed that the learned policy did not achieve a true multi-objective balance. At 57.4% coverage and 15.2% connectivity uptime, the swarm systematically accepted connectivity penalties to optimise exploration, mirroring the behaviour of the CommNet baseline rather than discovering a hybrid equilibrium.
+  </p>
+
+  <h2>Evaluation Metrics &amp; Checkpoint Selection Pathologies</h2>
+  <p>
+    Due to transient policy stability, automated checkpoint selection criteria were implemented to retain optimal model weights during training. Evaluating candidate selection metrics revealed critical failure modes in standard multi-objective scalarisation.
+  </p>
+  <p>
+    Linear weighted summation criteria consistently selected trivial clustered policies, as static connectivity rewards outweighed early-stage coverage gains. Transitioning to a harmonic mean scalarisation, designed to heavily penalise single-objective neglect, mitigated trivial clustering but introduced severe variance sensitivity across short evaluation sampling windows (8 episodes/epoch).
+  </p>
+
+  <table class="results">
+    <thead>
+      <tr><th>Checkpoint Epoch</th><th>Scalar Score</th><th>Training Performance</th><th>Post-Training Evaluation</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Epoch 464 (Selected)</strong></td><td>0.4724</td><td>36.6% cov · 88.8% conn · 45.5 coll</td><td>27.2% cov · 72.8% conn · 143.56 coll</td></tr>
+      <tr><td>Epoch 263 (Runner-Up)</td><td>0.4657</td><td>61.8% cov · 39.0% conn · 12.1 coll</td><td>Not retained (Discarded)</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Epoch 263 represented the most balanced non-dominated policy identified in the project, outperforming all Phase 1 baseline seeds across coverage, connectivity, and collision metrics simultaneously. However, because single-epoch selection was subject to sampling variance, the metric selected Epoch 464—a checkpoint occurring mid-collapse. During post-training evaluation across 50 seeded evaluation episodes, Epoch 464 exhibited severe performance degradation, yielding 27.2% coverage and 143.56 collisions per episode.
+  </p>
+
+  <h2>Comparative Evaluation</h2>
+  <p>
+    All candidate policies were benchmarked across 50 seeded evaluation episodes under identical initialisations. Metrics report mean values and single-standard-deviation intervals.
+  </p>
+
+  <table class="results">
+    <thead>
+      <tr><th>Architecture / Policy</th><th>Area Coverage</th><th>Connectivity Uptime</th><th>Collisions / Episode</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>CommNet (Phase 0 — Coverage Only)</strong></td><td><strong>87.1% ± 4.0%</strong></td><td>20.6%</td><td>18.22</td></tr>
+      <tr><td><strong>CommNet (Phase 1 — All Objectives)</strong></td><td>74.6% ± 4.2%</td><td>7.3%</td><td><strong>2.50</strong></td></tr>
+      <tr><td>NoisyGraph (Strongest Seed)</td><td>53.2% ± 5.9%</td><td>38.2%</td><td>10.70</td></tr>
+      <tr><td>NoisyGraph (4-Seed Mean)</td><td>35.1%</td><td>83.9%</td><td>46.50</td></tr>
+      <tr><td>Staged Curriculum (Final Policy)</td><td>34.4% ± 4.7%</td><td>48.1%</td><td>24.10</td></tr>
+      <tr><td>Staged Curriculum (Selected Policy)</td><td>27.2% ± 6.2%</td><td>72.8%</td><td>143.56</td></tr>
+      <tr><td>Random Action Baseline</td><td>33.2% ± 5.3%</td><td>44.0%</td><td>13.40</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="assets/uav/tradeoff.png" alt="Scatter plot of coverage against connectivity uptime for every evaluated policy, with collisions per episode in the legend.">
+    <figcaption>
+      Objective trade-off space across evaluated policies. Clustered policies concentrate in the high-connectivity / low-coverage region (top-left), while broadcast baselines occupy the high-coverage / low-connectivity domain (bottom-right). The central region represents balanced multi-objective equilibrium.
+    </figcaption>
+  </figure>
+
+  <figure>
+    <img src="assets/uav/coverage_maps.png" alt="Coverage maps with drone trajectories for CommNet, a clustered NoisyGraph seed, the Phase 1.5 policy and a random baseline.">
+    <figcaption>
+      Representative evaluation spatial trajectories overlaid on covered grid terrain across benchmark configurations.
+    </figcaption>
+  </figure>
+
+  <h2>Diagnostic Findings &amp; Next Steps</h2>
+  <p>
+    Empirical results from Phases 1 and 1.5 identify three structural challenges to be addressed in Phase 2:
+  </p>
+  <p>
+    First, unconstrained policy gradient updates induce catastrophic policy collapse, requiring trust-region optimisation constraints (e.g., PPO clip boundaries) 
+    to restrict step sizes. Second, scalarised reward signals cause credit assignment interference across conflicting goals, requiring value function decomposition 
+    to model separate per-objective critics. Third, single-epoch evaluation metrics overfit to sample noise and discard Pareto-dominant trajectories, requiring 
+    a Pareto-aware checkpoint selection mechanism evaluated over rolling Monte Carlo validation windows.
+  </p>
+
+  <h2>Research Roadmap</h2>
+  <ul class="pubs">
+    <li><strong>Phase 0 (Complete):</strong> Kinematic environment formulation, discrete action space, CommNet baseline, single-objective coverage optimisation.</li>
+    <li><strong>Phase 1 (Complete):</strong> Multi-objective reward integration (connectivity and collision bounds), NoisyGraph porting with oracle state estimates, 4-seed benchmark suite.</li>
+    <li><strong>Phase 1.5 (Complete):</strong> Diagnostic analysis of clustering failure modes, staged curriculum design, optimisation stability and checkpoint evaluation study.</li>
+    <li><strong>Phase 2 (Active):</strong> Trust-region policy updates, per-objective value function decomposition, Pareto-aware validation selection, continuous velocity control.</li>
+    <li><strong>Phase 3 (Planned):</strong> Channel degradation integration (thesis noise primitives), decentralised topology estimation under latency and packet loss, battery constraints.</li>
+    <li><strong>Phase 4 (Planned):</strong> High-fidelity physics simulation integration via <code>gym-pybullet-drones</code> with vision-based state representations.</li>
+    <li><strong>Phase 5 (Planned):</strong> Task generalisation: dynamic target tracking and search-and-rescue extensions.</li>
+  </ul>
+
+  <p style="margin-top:2.2rem">
+    <a class="backlink" href="index.html">← Back to the portfolio</a>
+  </p>
+</article>
+</main>
+
+<footer class="site">
+  <span>Anastasios Kontogiorgis · © 2026</span>
+  <span>
+    <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> ·
+    <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a>
+  </span>
+</footer>
+
+</div>
+</body>
+</html>

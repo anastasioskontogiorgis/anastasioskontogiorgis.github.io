@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 704 470" width="704" height="470" role="img" aria-labelledby="t d">
+<title id="t">Phishing detection service architecture</title>
+<desc id="d">The notebook audits the corpus, deduplicates it, fits a TF-IDF and logistic regression pipeline and exports a versioned artefact with its metadata. A containerised FastAPI application loads those two files and serves a prediction endpoint, a browser interface, a health check and a statistics endpoint, writing structured logs that record metrics and never message content.</desc>
+
+<style>
+  .box   { fill:#ffffff; stroke:#dcdfe2; stroke-width:1; rx:5; }
+  .boxhi { fill:#1f3864; stroke:#1f3864; stroke-width:1; rx:5; }
+  .panel { fill:#f6f7f5; stroke:#e4e7e4; stroke-width:1; rx:8; }
+  .hd    { font:600 12.5px "Space Grotesk", system-ui, sans-serif; fill:#182635; }
+  .hdw   { font:600 12.5px "Space Grotesk", system-ui, sans-serif; fill:#ffffff; }
+  .bd    { font:400 10px "IBM Plex Mono", ui-monospace, monospace; fill:#182635; }
+  .bdw   { font:400 10px "IBM Plex Mono", ui-monospace, monospace; fill:#d8dee9; }
+  .an    { font:400 9px "IBM Plex Mono", ui-monospace, monospace; fill:#8b94a3; }
+  .anw   { font:400 9px "IBM Plex Mono", ui-monospace, monospace; fill:#aab6c8; }
+  .lbl   { font:500 8.5px "IBM Plex Mono", ui-monospace, monospace; fill:#8b94a3; letter-spacing:.12em; }
+  .tag   { font:600 10px "Space Grotesk", system-ui, sans-serif; fill:#b96a1e; }
+  .flow  { stroke:#8b94a3; stroke-width:1.2; fill:none; marker-end:url(#a); }
+</style>
+<defs>
+  <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="#8b94a3"/>
+  </marker>
+</defs>
+
+<!-- ══ offline ══ -->
+<rect class="panel" x="22" y="26" width="660" height="248"/>
+<text class="lbl" x="666" y="42" text-anchor="end">OFFLINE · ANALYSIS NOTEBOOK</text>
+
+<rect class="box" x="40" y="52" width="624" height="46"/>
+<text class="hd" x="54" y="71">Kaggle phishing email corpus</text>
+<text class="an" x="54" y="86">18,650 emails · labelled safe or phishing</text>
+
+<path class="flow" d="M352 98 L352 118"/>
+
+<rect class="box" x="40" y="120" width="624" height="58"/>
+<text class="hd" x="54" y="139">Audit and clean protocol</text>
+<text class="bd" x="54" y="155">drop 552 unusable rows → deduplicate → stratified 80/20 split</text>
+<text class="an" x="54" y="169">17,521 usable · 14,016 train · 3,505 held-out test</text>
+
+<path class="flow" d="M352 178 L352 198"/>
+
+<rect class="boxhi" x="40" y="200" width="380" height="56"/>
+<text class="hdw" x="54" y="219">TF-IDF + logistic regression</text>
+<text class="bdw" x="54" y="235">50,000 terms · unigrams and bigrams</text>
+<text class="anw" x="54" y="248">refit on all clean data after validation</text>
+
+<rect class="box" x="436" y="200" width="228" height="56"/>
+<text class="hd" x="450" y="219">Exported artefacts</text>
+<text class="bd" x="450" y="235">phishing_pipeline.joblib</text>
+<text class="bd" x="450" y="249">metadata.json</text>
+
+<path class="flow" d="M420 228 L434 228"/>
+
+<!-- crossing the boundary -->
+<path class="flow" d="M550 256 L550 306"/>
+<text class="lbl" x="562" y="286">versioned</text>
+
+<!-- ══ online ══ -->
+<text class="lbl" x="40" y="292">ONLINE · CONTAINER</text>
+<rect class="box" x="22" y="300" width="660" height="152"/>
+
+<rect class="box" x="40" y="316" width="286" height="52"/>
+<text class="hd" x="54" y="335">FastAPI · uvicorn</text>
+<text class="an" x="54" y="350">non-root user · scikit-learn pinned to training version</text>
+
+<rect class="box" x="342" y="316" width="322" height="52"/>
+<text class="hd" x="356" y="335">Endpoints</text>
+<text class="bd" x="356" y="351">/predict · / · /health · /stats</text>
+
+<path class="flow" d="M326 342 L340 342"/>
+<!-- each request writes a log line and updates the counters /stats reports -->
+<path class="flow" d="M420 368 L420 379 L195 379 L195 388"/>
+<path class="flow" d="M560 368 L560 388"/>
+
+<rect class="box" x="40" y="390" width="310" height="48"/>
+<text class="hd" x="54" y="409">Structured request log</text>
+<text class="an" x="54" y="424">verdict · probability · latency · text length</text>
+<text class="tag" x="252" y="409">never content</text>
+
+<rect class="box" x="366" y="390" width="298" height="48"/>
+<text class="hd" x="380" y="409">/stats drift monitor</text>
+<text class="an" x="380" y="424">running prediction distribution vs baseline</text>
+
+</svg>

@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research — Anastasios Kontogiorgis</title>
+<meta name="description" content="Channel-robust emergent communication for connected autonomous vehicles: the NoisyGraph framework, publications and results.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+<header class="site">
+  <a class="brand" href="index.html">
+    <span class="avatar">AK</span>
+    <span>Anastasios Kontogiorgis</span>
+  </a>
+  <nav class="site">
+    <a href="index.html#projects">Projects</a>
+    <a href="research.html">Research</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+</header>
+
+<article class="research">
+<p class="eyebrow">PhD in Computer Science (AI) · Trinity College Dublin · Thesis under examination</p>
+  <h1>Research</h1>
+  <p class="standfirst">
+    Deploying learned multi-agent coordination in the real world requires resilience to environmental and transmission degradation.
+	This thesis develops a channel-robust emergent communication framework for connected autonomous vehicles (CAVs) that dynamically
+	adapts its communication configuration based on the underlying environmental topology.
+  </p>
+  <p class="meta" style="font:400 .9rem var(--mono); color:var(--noise)">
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID 0000-0003-4921-3835</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/channel-robust-emergent-communication">Benchmark framework code</a>
+  </p>
+
+  <hr class="channel" aria-hidden="true">
+
+  <h2>Problem Formulation &amp; Motivation</h2>
+  <p>
+    Connected autonomous vehicles can navigate unsignalised intersections safely by sharing localised state observations via peer-to-peer networks. A highly scalable approach to this coordination relies on multi-agent reinforcement learning (MARL) with <em>emergent communication</em>, where agents learn an optimal communication protocol simultaneously with their navigation policy.
+  </p>
+  <p>
+    State-of-the-art emergent communication models rely on the unrealistic assumption of ideal communication (i.e. every message is reliable, arrives instantly and intact).
+	In real-world deployments, perception is ambiguous, and communication channels delay, drop, corrupt, and reorder packets. Because coordination policies act
+	on these corrupted beliefs, unmitigated channel noise presents a real safety risk. My doctoral research investigated 
+	how <strong>learned communication protocols can be made structurally adaptive to scene geometry and robust to communication noise, 
+	without sacrificing the coordination achieved under reliable communication.</strong> Specifically, it addresses two distinct forms of noise:
+	semantic distortion from ambiguous observations that propagates through messages, and channel corruption arising from a faulty channel during transmissionition.
+  </p>
+  <p>
+    The research is organised in three stages: empirical communication-noise vulnerability analysis, systematic noise taxonomy, and development of the NoisyGraph framework.
+  </p>
+
+  <h2>Empirical Baseline Vulnerability</h2>
+  <p>
+    My <a href="#publications">initial publications</a> systematically evaluated state-of-the-art emergent-communication architectures (CommNet, IC3Net, TarMAC, GA-Comm, MAGIC) under realistic synthetic channel disruptions, including additive noise, partial and full packet loss, latency and message jumbling, on an unsignalised-intersection benchmark. 
+  </p>
+  <p>
+    The empirical findings revealed a real vulnerability: while baseline models tolerated low-intensity additive noise, even modest packet loss and temporal disruptions triggered sharp success-rate degradation out of proportion to the noise severity, concentrated heavily in high-density, safety-critical traffic states. Demonstrating this systemic degradation provided the empirical evidence that motivated the shift toward developing a dedicated, noise-robust architecture: NoisyGraph.
+  </p>
+
+  <h2>Taxonomy of Multi-Agent Noise</h2>
+  <p>
+    To formalise these vulnerabilities, I conducted a systematic survey of noise in multi-agent reinforcement learning (under review at JAAMAS). This work proposes a five-category taxonomy of noise sources, ranging from exploration stochasticity to channel interference, and synthesises mitigation strategies across the literature. The analysis identifies emergent communication as the most robust theoretical framework for addressing the two most intractable categories: environmental occlusion and communication channel degradation.
+  </p>
+
+  <h2>The NoisyGraph Framework</h2>
+  <p>
+    The core contribution of the thesis is <strong>NoisyGraph</strong>, an adaptive, reliability-aware emergent-communication architecture developed across three phases. Each phase targets a distinct layer of the communication pipeline and is evaluated on the most demanding configuration of the intersection benchmark (18×18 grid, up to 20 vehicles, partial observability).
+  </p>
+
+  <figure>
+    <img src="assets/research/phase_3_System_Overview.png"
+         alt="NoisyGraph-RC two-stage execution pipeline diagram: observation encoding, channel noise injection, autoencoder reliability estimation, reliability-aware GAT stacks, and policy heads.">
+    <figcaption>NoisyGraph-RC execution pipeline and two-stage training scheme. Stage 1 optimises policy and feature representation weights (<math><msub><mi>θ</mi><mtext>frozen</mtext></msub></math>) in clean environments. Stage 2 freezes the coordination policy and fine-tunes only the calibratable parameters (<math><msub><mi>θ</mi><mtext>calib</mtext></msub></math>$), namely the autoencoder noise detector, the reliability-aware GAT schedulers and the message encoders, under active per-hop channel noise injection.</figcaption>
+  </figure>
+
+  <h3>Phase I: Spatially Adaptive Topology Construction</h3>
+  <p>
+    Prior emergent-communication frameworks rest on three architectural assumptions: a fixed connectivity structure, whether global broadcast or an always-complete graph, a predetermined number of communication rounds, and a static mapping from rounds to processing layers. Each has a cost. In sparse configurations the fixed structure cannot extend reach far enough to cover the agent spread, leaving critical information out of range. In dense clusters an always-complete graph propagates redundant messages across every pair at once, diluting informative signals and loading the attention mechanism unnecessarily. And a static round-to-layer mapping decouples computational depth from the actual complexity of the configuration at each step.
+  </p>
+  <p>
+    NoisyGraph replaces these priors with a spatially grounded architecture. At each environment step it records the physical coordinates of all active agents and constructs a dynamic communication graph, linking pairs within a proximity threshold directly and connecting more distant pairs through relay chains of intermediate agents whose separations fall within a hop-distance budget. The construction simultaneously determines <math><msub><mi>H</mi><mtext>opt</mtext></msub></math>, the minimum hop count required to span the farthest agent pair, which then dictates how many hop-specific graph-attention layers are activated for that step. Communication rounds and processing layers stand in one-to-one correspondence, both derived from the instantaneous geometry of the scene.
+  </p>
+  <p>
+    The design serves a second purpose beyond efficiency. Every additional hop is an opportunity for distortion to accumulate, so avoiding excessive hops reduces the area over which noise can propagate before any explicit reliability estimation is applied. Phase I therefore establishes the foundation on which the later mechanisms operate.
+  </p>
+  <p>
+    <strong>Result.</strong> Evaluated on the standard non-signalised intersection benchmark at the Hard difficulty setting, an 18×18 grid with up to 20 agents and limited visibility, NoisyGraph achieves an <strong>89.88% collision-free success rate against 88.46% for MAGIC, 87.55% for IC3Net and 74.00% for CommNet</strong>. Inter-agent distance correlates with the dynamically computed <math><msub><mi>H</mi><mtext>opt</mtext></msub></math> at <math><mi>r</mi><mo>=</mo><mn>0.82</mn></math>, confirming that communication depth adapts in a geometry-aware manner.
+  </p>
+
+  <figure>
+    <img src="assets/research/phase_1_adaptive_topology_comm_depth.png"
+         alt="Diagram of adaptive communication topology: relay chains bridging distant agents on a grid, and a GAT layer stack where only the needed hop depth is active.">
+    <figcaption>Topology adaptation. Sparse configurations extend communication reach through multi-hop relay chains, while dense clusters restrict propagation. Network depth maps directly to spatial geometry.</figcaption>
+  </figure>
+
+  <h3>Phase II: Unsupervised Reliability Estimation</h3>
+  <p>
+    Phase II addresses <em>semantic noise</em>, the distortion that arises when environmental complexity, partial observability or occlusion causes an agent to encode degraded or ambiguous information into the message it sends. This is distinct from corruption acquired in transit, which Phase III handles.
+  </p>
+  <p>
+    An autoencoder-based detector processes each outgoing message and computes its reconstruction error against the learnt manifold of typical messages, treating messages that are difficult to reconstruct as likely to carry unreliable content. The error is converted into a per-message reliability score and integrated into the attention mechanism through a reliability-weighted fusion, with the attention logits modulated by a scaled log-reliability term so that unreliable messages are down-weighted in neighbour selection and feature aggregation alike. The approach requires no labelled examples of corruption, and it detects distortion at the message level after encoding rather than at the observation stage.
+  </p>
+  <p>
+    <strong>Result.</strong> As vehicle count and occlusion increase, NoisyGraph-R reduces performance degradation by <strong>19 to 29% relative to baselines</strong>. In the cluttered regime it holds <strong>89.64% success at 7.23% degradation, against 8.97% for the base model and 10.23% for MAGIC</strong>. Reconstruction error correlates with agent density at $\rho = 0.9187$ and with task success at <math><mi>ρ</mi><mo>=</mo><mo>−</mo><mn>0.8809</mn></math>, confirming that the detector responds to environmentally induced corruption and that the corruption it finds is task-relevant.
+  </p>
+
+  <h3>Phase III: Channel Calibration via Representation Fine-Tuning</h3>
+  <p>
+    Phase III extends the same reliability pathway to <em>channel noise</em>, meaning corruption introduced during transmission. NoisyGraph-RC adopts a two-stage strategy. The reinforcement-learning policy is first trained under reliable communication, and a targeted calibration phase then fine-tunes only the reliability-specific parameters, namely the autoencoder and a subset of the graph-attention reliability weights, under a configurable mixture of six impairment types: additive noise, SNR-based fading, burst errors, packet drops, delays and message jumbling.
+  </p>
+  <p>
+    Separating the two stages preserves the coordination policy learnt under clean conditions while allowing the autoencoder to learn the reconstruction patterns characteristic of channel-induced corruption. One detection pathway therefore covers both semantic and channel noise.
+  </p>
+  <p>
+    <strong>Result.</strong> Across eleven validation scenarios spanning all six impairment types, NoisyGraph-RC maintains an <strong>88.34% average collision-free success rate against 79.45% for the base model and 74.47% for MAGIC</strong>. Degradation grows gracefully with severity, at 2.69%, 4.51% and 7.65% for light, moderate and severe intensities. Under worst-case combined stress, with simultaneous burst errors, low SNR and packet loss, it holds <strong>74.37% against 56.90% for the strongest baseline</strong>. Ten of the eleven configurations stay within acceptable margins, and that combined-stress case is the only one to exceed the robustness threshold, which marks multi-source corruption as the open problem.
+  </p>
+
+  <figure>
+    <img src="assets/research/phase3_fig3_robustness_heatmap.png"
+         alt="Heatmap of NoisyGraph-RC success rates across eleven validation scenarios and three noise intensities, mostly green with graceful decline toward severe combined stress.">
+    <figcaption>NoisyGraph-RC success retention across validation scenarios and impairment intensities.</figcaption>
+  </figure>
+
+  <h2>Translational Impact &amp; Industry Applicability</h2>
+  <p>
+    A core design principle unifying this research is the <strong>separation of concerns</strong>: optimising base coordination policies independently of channel robustness, and utilising a source-agnostic reliability pathway that filters representations regardless of whether noise originates from sensor occlusion or network interference, a property measured by an MSE sensitivity ratio of 0.74 between the two noise sources. This modular philosophy enables direct transfer to broader multi-agent domains, an architectural property currently being validated in my active <a href="uav.html">UAV swarm project</a>.
+  </p>
+  <p>
+    Beyond autonomous vehicles, the methodological findings from this thesis address core challenges in applied data science and production machine learning. Designing learning systems that behave predictably under degraded, noisy, or out-of-distribution inputs translates directly to risk modelling, fraud detection, and transactional time-series forecasting. 
+  </p>
+  <p>
+    Furthermore, as decentralised AI systems scale, managing network bandwidth constraints, establishing implicit trust boundaries, and coordinating policies under partial observability are becoming primary engineering bottlenecks. Resolving these challenges required deep technical execution across deep reinforcement learning, graph attention networks, unsupervised anomaly detection (autoencoders), and statistically rigorous experimental design.
+  </p>
+
+  <h2 id="publications">Publications</h2>
+  <ul class="pubs">
+    <li>
+      <strong>CAV Unsignalised Intersection Crossing with Unreliable Emergent Communication: A Comprehensive Analysis under Diverse Disruptions.</strong><br>
+      <em>European Journal of Artificial Intelligence</em>, ATT 2024 Special Issue — In final review, DOI pending.
+    </li>
+    <li>
+      <strong>Noise in Multi-Agent Reinforcement Learning and Emergent Communication: A Systematic Taxonomy and Survey of Challenges and Solutions.</strong><br>
+      Under review, <em>Autonomous Agents and Multi-Agent Systems</em> (JAAMAS).
+    </li>
+    <li>
+      <strong>CAV Unsignalised Intersection Crossing with Unreliable Emergent Communication.</strong><br>
+      <em>ATT'24: Workshop on Agents in Traffic and Transportation</em>, Santiago de Compostela, 2024 —
+      <a href="https://ceur-ws.org/Vol-3813/5.pdf">Open access (CEUR)</a>.
+    </li>
+    <li>
+      <strong>Thesis:</strong> <em>Channel-Robust Emergent Communication: Mitigating Complex Network Distortions via Reliability-Aware Graph Attention.</em> Trinity College Dublin, submitted March 2026 (Under examination).
+    </li>
+  </ul>
+
+  <p style="margin-top:2.2rem">
+    <a class="backlink" href="index.html">← Back to the portfolio</a>
+  </p>
+</article>
+
+<footer class="site">
+  <span>Anastasios Kontogiorgis · © 2026</span>
+  <span>
+    <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> ·
+    <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a>
+  </span>
+</footer>
+
+</div>
+</body>
+</html>

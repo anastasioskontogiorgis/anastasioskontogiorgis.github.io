@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 704 600" width="704" height="600" role="img" aria-labelledby="t d">
+<title id="t">Book recommender system architecture</title>
+<desc id="d">A pipeline diagram. The Book-Crossing catalogue and the Open Library API feed corpus construction, which produces a 15,000-book enriched sample. Embedded text is built from title and description. Three representation variants branch from it: TF-IDF on titles, TF-IDF on title and description, and MiniLM dense embeddings. All three feed a common evaluation harness. The MiniLM variant additionally exports precomputed artefacts, which cross an offline-to-online boundary into the deployed Gradio application, where retrieval is a single inner product.</desc>
+
+<style>
+  .box   { fill: #ffffff; stroke: #dcdfe2; stroke-width: 1; rx: 5; }
+  .boxhi { fill: #1f3864; stroke: #1f3864; stroke-width: 1; rx: 5; }
+  .panel { fill: #f6f7f5; stroke: #e4e7e4; stroke-width: 1; rx: 8; }
+  .hd    { font: 600 12.5px "Space Grotesk", system-ui, sans-serif; fill: #182635; }
+  .hdw   { font: 600 12.5px "Space Grotesk", system-ui, sans-serif; fill: #ffffff; }
+  .bd    { font: 400 10px "IBM Plex Mono", ui-monospace, Menlo, monospace; fill: #182635; }
+  .bdw   { font: 400 10px "IBM Plex Mono", ui-monospace, Menlo, monospace; fill: #d8dee9; }
+  .an    { font: 400 9px "IBM Plex Mono", ui-monospace, Menlo, monospace; fill: #8b94a3; }
+  .anw   { font: 400 9px "IBM Plex Mono", ui-monospace, Menlo, monospace; fill: #aab6c8; }
+  .lbl   { font: 500 8.5px "IBM Plex Mono", ui-monospace, Menlo, monospace; fill: #8b94a3; letter-spacing: .12em; }
+  .tag   { font: 600 10px "Space Grotesk", system-ui, sans-serif; fill: #b96a1e; }
+  .flow  { stroke: #8b94a3; stroke-width: 1.2; fill: none; marker-end: url(#a); }
+  .bus   { stroke: #8b94a3; stroke-width: 1.2; fill: none; }
+</style>
+
+<defs>
+  <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="#8b94a3"/>
+  </marker>
+</defs>
+
+<!-- offline region -->
+<rect class="panel" x="22" y="26" width="660" height="446"/>
+<text class="lbl" x="666" y="42" text-anchor="end">OFFLINE · ANALYSIS NOTEBOOK</text>
+
+<!-- ── band 1: sources ── -->
+<rect class="box" x="40" y="52" width="300" height="42"/>
+<text class="hd" x="54" y="70">Book-Crossing catalogue</text>
+<text class="an" x="54" y="85">271,360 records · title, author, ISBN</text>
+
+<rect class="box" x="364" y="52" width="300" height="42"/>
+<text class="hd" x="378" y="70">Open Library API</text>
+<text class="an" x="378" y="85">descriptions · subject tags</text>
+
+<path class="flow" d="M190 94 L190 118"/>
+<path class="flow" d="M514 94 L514 118"/>
+
+<!-- ── band 2: corpus ── -->
+<rect class="box" x="40" y="120" width="624" height="58"/>
+<text class="hd" x="54" y="140">Corpus construction</text>
+<text class="bd" x="54" y="156">deduplicate → 15,000-book deterministic sample → enrich</text>
+<text class="an" x="54" y="170">99.9% of ISBNs resolved · 37% with description · 91.5% with subject tags</text>
+
+<path class="flow" d="M352 178 L352 202"/>
+
+<!-- ── band 3: text ── -->
+<rect class="box" x="40" y="204" width="624" height="46"/>
+<text class="hd" x="54" y="223">Embedded text</text>
+<text class="an" x="54" y="238">title + description, or title alone where no description exists</text>
+
+<path class="bus" d="M352 250 L352 264"/>
+<path class="bus" d="M139 264 L565 264"/>
+<path class="flow" d="M139 264 L139 282"/>
+<path class="flow" d="M352 264 L352 282"/>
+<path class="flow" d="M565 264 L565 282"/>
+
+<!-- ── band 4: representation variants ── -->
+<rect class="box" x="40" y="284" width="198" height="66"/>
+<text class="tag" x="54" y="303">A</text>
+<text class="hd" x="72" y="303">TF-IDF</text>
+<text class="bd" x="54" y="321">title only</text>
+<text class="an" x="54" y="336">500-d sparse</text>
+
+<rect class="box" x="253" y="284" width="198" height="66"/>
+<text class="tag" x="267" y="303">B</text>
+<text class="hd" x="285" y="303">TF-IDF</text>
+<text class="bd" x="267" y="321">title + description</text>
+<text class="an" x="267" y="336">5,000-d sparse</text>
+
+<rect class="boxhi" x="466" y="284" width="198" height="66"/>
+<text class="tag" x="480" y="303">C</text>
+<text class="hdw" x="498" y="303">MiniLM-L6-v2</text>
+<text class="bdw" x="480" y="321">title + description</text>
+<text class="anw" x="480" y="336">384-d dense</text>
+
+<!-- variants → harness -->
+<path class="bus" d="M139 350 L139 366"/>
+<path class="bus" d="M352 350 L352 366"/>
+<path class="bus" d="M530 350 L530 366"/>
+<path class="bus" d="M139 366 L530 366"/>
+<path class="flow" d="M255 366 L255 386"/>
+
+<!-- C → export -->
+<path class="flow" d="M610 350 L610 386"/>
+
+<!-- ── band 5: harness ── -->
+<rect class="box" x="40" y="388" width="430" height="64"/>
+<text class="hd" x="54" y="407">Evaluation harness</text>
+<text class="an" x="54" y="422">500 seeded queries · weak subject labels · random floor</text>
+<text class="bd" x="54" y="440">A 0.128 · B 0.150 · C 0.292 · random 0.020</text>
+
+<!-- ── band 6: export ── -->
+<rect class="box" x="486" y="388" width="178" height="64"/>
+<text class="hd" x="500" y="407">Artefact export</text>
+<text class="bd" x="500" y="423">embeddings.npy</text>
+<text class="an" x="500" y="436">15,000 × 384 float32</text>
+<text class="bd" x="500" y="448">catalog.parquet</text>
+
+<!-- export → serving, crossing the boundary -->
+<path class="flow" d="M575 452 L575 508"/>
+<text class="lbl" x="588" y="486">precomputed</text>
+
+<!-- ── band 7: serving ── -->
+<text class="lbl" x="40" y="490">ONLINE · DEPLOYED SERVICE</text>
+<rect class="box" x="40" y="510" width="624" height="62"/>
+<text class="hd" x="54" y="530">app.py · Gradio on Hugging Face Spaces</text>
+<text class="bd" x="54" y="546">load artefacts → inner product (15,000 × 384) → top-5</text>
+<text class="an" x="54" y="561">no model download and no PyTorch dependency at serving time</text>
+
+</svg>

@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phishing Email Detection — Anastasios Kontogiorgis</title>
+<meta name="description" content="A phishing email classifier served through a containerised API, with the corpus audited for leakage, the model's reliance on data provenance measured, and its behaviour outside the training corpus quantified.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <a class="brand" href="index.html">
+    <span class="avatar">AK</span>
+    <span>Anastasios Kontogiorgis</span>
+  </a>
+  <nav class="site">
+    <a href="index.html#projects">Projects</a>
+    <a href="research.html">Research</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+<article class="research">
+  <p class="eyebrow">Applied project · Text classification and deployment · Complete</p>
+  <h1>Phishing Email Detection</h1>
+  <p class="standfirst">
+    A binary text classifier served through a containerised API, developed alongside
+    the measurements that establish what its reported performance covers. The
+    headline figures are strong, and the more useful result is the analysis
+    identifying where they stop applying.
+  </p>
+  <p class="meta" style="font:400 .9rem var(--mono); color:var(--noise)">
+    <a href="https://github.com/anastasioskontogiorgis/phishing-detection-pipeline">Code &amp; writeup</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/phishing-detection-pipeline/blob/main/phishing_v2.ipynb">Analysis notebook</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/phishing-detection-pipeline/blob/main/app/main.py">Serving code</a>
+  </p>
+
+  <hr class="channel" aria-hidden="true">
+
+  <h2>Auditing the Corpus</h2>
+  <p>
+    The dataset is the Kaggle phishing email corpus, containing 18,650 emails
+    labelled either safe or phishing. Its construction is undocumented, which is the
+    reason the sections below spend as much effort on what the corpus contains as on
+    the model fitted to it. Three properties are established before any model is
+    fitted. Of the total, 552 rows
+    carry no usable text, including 533 holding the literal placeholder string
+    <code>"empty"</code>, which a model would memorise as a class signal. A further
+    3.2% duplicate another row exactly, which affects evaluation because a random
+    split places verbatim copies of training emails into the test set. No text
+    appears under both labels, so deduplication discards no information.
+  </p>
+  <p>
+    Evaluating identical features and model under both protocols isolates the cost
+    of that leakage. Under the naive protocol one test email in twenty is a
+    verbatim copy of a training email, and deduplicating before the split reduces
+    accuracy by approximately half a percentage point, indicating that the
+    classifier depends only marginally on memorised text.
+  </p>
+
+  <h2>Model Selection</h2>
+  <p>
+    Linear SVM leads the benchmark at 0.980 cross-validated F1 against logistic
+    regression at 0.972, a margin several times the fold-to-fold spread. Logistic
+    regression is the model that ships, because the service returns a calibrated
+    probability on which the operating threshold, the browser interface and the
+    monitoring endpoint all depend, whereas <code>LinearSVC</code> exposes only
+    decision-function margins. Its coefficients are also directly interpretable,
+    which the ablation described below requires. Wrapping the support vector machine in
+    <code>CalibratedClassifierCV</code> would recover probabilities from the
+    stronger model, and that option is recorded and deferred, since the binding
+    constraint on this model is corpus provenance and not the final fraction of
+    in-corpus F1.
+  </p>
+
+  <h2>Held-Out Performance</h2>
+
+  <table class="results">
+    <thead>
+      <tr><th>Metric</th><th>Value</th><th>Metric</th><th>Value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Accuracy</td><td><strong>0.979</strong></td><td>F1, phishing class</td><td><strong>0.972</strong></td></tr>
+      <tr><td>ROC-AUC</td><td><strong>0.997</strong></td><td>Brier score</td><td><strong>0.029</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Measured on the 3,505 held-out emails from the clean split described above.
+    Those figures describe mail resembling the training corpus, and the two sections
+    that follow establish what the model relies on and where it stops working.
+  </p>
+
+  <h2>Probability Calibration</h2>
+
+  <figure>
+    <img src="assets/phishing/reliability.png" alt="Reliability curve for the held-out test set, plotting observed phishing rate against mean predicted probability, with a diagonal marking perfect calibration.">
+    <figcaption>
+      Predicted probabilities against observed frequencies on the held-out set. The
+      curve tracks the diagonal closely at both extremes, where the large majority
+      of predictions fall. The deviation in the middle of the range covers few
+      emails and is correspondingly noisy.
+    </figcaption>
+  </figure>
+
+  <p>
+    The ROC curve assesses only the ordering of predictions. A deployed filter needs
+    more than an ordering, because the operating threshold has to correspond to a
+    real error rate. The Brier score of 0.029 and the curve above establish that it
+    does, at least for mail resembling the training corpus.
+  </p>
+  <p>
+    Calibration is what turns the threshold into a business decision. An operator
+    setting the cut at 0.8, expecting roughly one error in five among flagged
+    messages, depends on that probability meaning what it says. The exported
+    artefact therefore returns the probability and not the label, so the operating
+    point can be set per deployment and revised as traffic changes.
+  </p>
+  <p>
+    Inspecting the highest-confidence errors shows the expected failure modes.
+    Marketing-flavoured legitimate mail draws false positives, while terse or
+    unusually formatted phishing draws false negatives. Both fall within the
+    categories that a threshold review and live monitoring are intended to manage.
+  </p>
+
+  <h2>What the Model Learned</h2>
+  <p>
+    A benchmark score of this size warrants scrutiny. The strongest phishing-leaning
+    coefficients are the terms a domain expert would expect, namely
+    <em>click</em>, <em>free</em>, <em>remove</em>, <em>money</em> and
+    <em>offer</em>. The strongest legitimate-leaning coefficients are
+    <em>enron</em>, <em>vince</em>, <em>louise</em>, <em>linguistics</em>,
+    <em>edu</em> and the years 2000 to 2002.
+  </p>
+  <p>
+    These are not features of legitimacy but features of provenance. The legitimate
+    class is drawn overwhelmingly from the Enron corpus and an academic linguistics
+    mailing list, both collected several years before the phishing samples,
+    suggesting that the classifier is partly determining whether a message is
+    Enron-era corporate or academic correspondence. Masking the source-identifying
+    tokens and re-running the identical protocol costs a small proportion of
+    performance, indicating that the in-corpus signal is not carried by a handful
+    of named tokens.
+  </p>
+
+  <h2>Behaviour Outside the Training Corpus</h2>
+  <p>
+    The ablation establishes that named tokens are not load-bearing. It does not
+    establish robustness beyond the corpus, and that distinction proved to be the
+    substantive finding. A probe set of thirty short emails was written for the
+    purpose, twenty-four in a contemporary register and six as controls using the
+    vocabulary of the training corpus. The controls matter as much as the modern
+    probes, since a decline measured without them could be attributed to the probes
+    being more difficult.
+  </p>
+
+  <table class="results">
+    <thead>
+      <tr><th>Probe group</th><th>accuracy</th><th>class separation</th><th>prediction sd</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Era controls (n = 6)</td><td>1.000</td><td>0.847</td><td>0.465</td></tr>
+      <tr><td>Modern register (n = 24)</td><td>0.833</td><td>0.317</td><td>0.219</td></tr>
+      <tr><td>Held-out test set (n = 3,505)</td><td>0.980</td><td>—</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <figure>
+    <img src="assets/phishing/class_separation.svg" alt="A probability axis from zero to one with the 0.5 threshold marked. On era controls the mean prediction for legitimate mail is 0.048 and for phishing 0.894, both far from the threshold. On modern mail the means are 0.273 and 0.590, both close to it.">
+    <figcaption>
+      Mean predicted probability by class. On era controls the two classes sit
+      either side of the threshold with a separation of 0.847. On modern mail the
+      separation contracts to 0.317 and both classes crowd the threshold, which is
+      the region where a small change in wording alters the verdict.
+    </figcaption>
+  </figure>
+
+  <p>
+    The model does not become confidently wrong outside its corpus. It becomes
+    uninformative in precisely the region where the deployed threshold sits. Mean
+    prediction on modern mail is 0.432 against a base rate of 0.5, close enough to
+    rule out systematic bias, while the prediction standard deviation falls from
+    0.465 to 0.219. Within the corpus a threshold of 0.5 lies far from both modes,
+    while on modern mail it passes through the middle of the distribution, so
+    small differences in wording determine the verdict.
+  </p>
+  <p>
+    Separating the two possible failures makes the result precise. Bias would mean
+    the model favouring one class outside its corpus, which a threshold shift could
+    partly correct. Loss of resolution means it no longer separates the classes,
+    which no threshold can correct. Mean prediction on modern mail is 0.432 against
+    a base rate of 0.5, so bias is negligible, while the prediction standard
+    deviation falls from 0.465 to 0.219 and the Brier score rises from 0.008 to
+    0.142. Under the standard decomposition of the Brier score into reliability,
+    resolution and the irreducible uncertainty of a balanced set, resolution net of
+    reliability falls from 0.242 to 0.108. The model has stopped discriminating
+    where it previously separated, and no threshold recovers that.
+  </p>
+  <p>
+    Decomposing the predicted log-odds into per-term contributions identifies the
+    mechanism. Vocabulary coverage barely falls, from 0.62 to 0.535, so unfamiliar
+    words are not the cause. Evidence supporting the true class approximately halves
+    in both directions while evidence supporting the incorrect class rises, and the
+    log-odds contract toward the intercept. The terms responsible are ordinary
+    office vocabulary carrying an association that is correct within the corpus and
+    misleading outside it, which no preprocessing rule would identify without a
+    second corpus for comparison.
+  </p>
+
+  <h2>The Service</h2>
+
+  <figure>
+    <img src="assets/phishing/architecture.svg" alt="Pipeline diagram. The notebook audits and deduplicates the corpus, fits a TF-IDF and logistic regression model and exports a versioned artefact with its metadata. A containerised FastAPI application loads both and serves four endpoints, writing structured logs that record metrics and never message content.">
+    <figcaption>
+      All fitting happens once in the notebook, so the container loads two files and
+      performs no training. The boundary is also where versioning matters: the
+      metadata records the protocol and the library version, and the image pins
+      scikit-learn to the version used in training.
+    </figcaption>
+  </figure>
+
+  <p>
+    The notebook exports a versioned scikit-learn pipeline alongside metadata
+    recording the library version, the training protocol and the held-out metrics.
+    A FastAPI application loads both and serves a <code>/predict</code> endpoint
+    returning the label, the phishing probability and the model version, a browser
+    interface for manual inspection, <code>/health</code> for orchestration, and
+    <code>/stats</code> for monitoring. The container runs as a non-root user and
+    pins the scikit-learn version to the one used in training.
+  </p>
+  <p>
+    Every request is logged as a single JSON line recording the verdict, the
+    probability, the latency and the character count, never the message text.
+    The <code>/stats</code> endpoint tracks the running prediction distribution
+    against the held-out baseline, and the probe study determines what to watch
+    for. Traffic unlike the training corpus produces predictions clustered around
+    the threshold, making a rising proportion of mid-range probabilities the
+    earliest available indication that the operating point requires revision.
+  </p>
+
+  <h2>Limitations</h2>
+  <p>
+    The evaluation rests on a single corpus whose phishing-class provenance is
+    undocumented. Construction artefacts were found on the legitimate side because
+    its sources are identifiable, and the same exercise cannot be performed on the
+    phishing side, so comparable artefacts may be present and undetected.
+  </p>
+  <p>
+    The probe study is a diagnostic instrument and not a measurement. Thirty
+    hand-written emails support no confidence interval, and they were written by
+    someone already aware of the model's weaknesses, so they are not a neutral
+    sample. What the study establishes is that the effect is reproducible,
+    mechanically explained by an exact decomposition of the score, and concentrated
+    where the threshold sits.
+  </p>
+  <p>
+    The benchmark figures are mildly optimistic, since the vectoriser was fitted on
+    the full training set before cross-validation folding. The effect is identical
+    across models and leaves the ranking intact, and the held-out evaluation is
+    unaffected. The classifier also uses text alone. URL structure, header
+    provenance and attachment metadata all carry substantial signal in a production
+    mail filter and sit outside its scope by construction.
+  </p>
+
+  <h2>Further Work</h2>
+  <p>
+    External validation is the first extension and the one that would change the
+    most. Scoring the artefact unchanged against a labelled corpus from a different
+    source would convert the probe finding into a figure with a sample size behind
+    it. It has to be preceded by a near-duplicate audit against this training set,
+    since undocumented provenance means overlap between the two corpora cannot be
+    ruled out and any overlap would inflate the result.
+  </p>
+  <p>
+    A threshold study is the second. The 0.5 default is a property of this corpus
+    and carries no operational meaning, whereas the cost asymmetry between
+    quarantining legitimate mail and admitting a phishing message is measurable per
+    organisation and is what should set the operating point. Calibrating the support
+    vector machine through Platt scaling is the third and least important, worth at
+    most 0.8 F1 points on a corpus whose binding constraint is provenance.
+  </p>
+
+  <p style="margin-top:2.2rem">
+    <a class="backlink" href="index.html">← Back to the portfolio</a>
+  </p>
+</article>
+</main>
+
+<footer class="site">
+  <span>Anastasios Kontogiorgis · © 2026</span>
+  <span>
+    <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> ·
+    <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a>
+  </span>
+</footer>
+
+</div>
+</body>
+</html>

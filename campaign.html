@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campaign Uplift: Measuring Causal Impact — Anastasios Kontogiorgis</title>
+<meta name="description" content="Estimating what a marketing campaign actually caused, by reconstructing the counterfactual. Validated against a known injected effect, then applied unchanged to a real retail intervention.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <a class="brand" href="index.html">
+    <span class="avatar">AK</span>
+    <span>Anastasios Kontogiorgis</span>
+  </a>
+  <nav class="site">
+    <a href="index.html#projects">Projects</a>
+    <a href="research.html">Research</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+<article class="research">
+  <p class="eyebrow">Applied project · Causal inference · Complete</p>
+  <h1>Campaign Uplift: Measuring Causal Impact</h1>
+  <p class="standfirst">
+    Evaluating promotional campaign efficacy requires isolating incremental revenue from baseline market dynamics. This project establishes a counterfactual identification framework using structural time-series models, validates its accuracy against synthetic benchmarks with known injected treatment effects, and applies the methodology to evaluate a real retail intervention.
+  </p>
+  <p class="meta" style="font:400 .9rem var(--mono); color:var(--noise)">
+    <a href="https://github.com/anastasioskontogiorgis/campaign-uplift-causal-impact">Code &amp; notebook</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/campaign-uplift-causal-impact/blob/main/campaign_uplift.ipynb">Executed analysis</a>
+  </p>
+
+  <hr class="channel" aria-hidden="true">
+
+  <h2>The Measurement Problem</h2>
+  <p>
+    Standard business analytics frequently evaluate marketing campaigns using naive pre-post or year-over-year revenue comparisons. These approaches implicitly assume stationarity in underlying demand, conflating organic growth trends, macro-seasonality, and promotional response. When a campaign coincides with a seasonal demand peak, naive attribution attributes organic market acceleration directly to marketing expenditure.
+  </p>
+
+  <figure>
+    <img src="assets/campaign/naive_comparison.png" alt="Daily revenue over nine months, with the campaign window shaded and horizontal lines marking the mean of the campaign window against the mean of the matched period before it.">
+    <figcaption>
+      Limitations of naive pre-post comparisons. The campaign window overlaps with Q1 seasonal demand expansion; comparing raw pre-post mean revenues conflates baseline trend, seasonal elasticity, and true incremental campaign lift.
+    </figcaption>
+  </figure>
+
+  <p>
+    Rigorously isolating incremental impact requires estimating the unobserved counterfactual: predicting what sales trajectory 
+    would have occurred during the campaign window in the absence of treatment. This workflow constructs synthetic controls using 
+    state-space structural time-series models incorporating local level trends, weekly seasonality, and unexposed control product series
+     as dynamic regressors, trained strictly on pre-intervention observations.
+  </p>
+
+  <h2>Methodology Validation on Synthetic Ground Truth</h2>
+  <p>
+    Because counterfactuals are inherently unobservable in observational field data, identification frameworks must be empirically
+     benchmarked under controlled conditions. To evaluate estimator reliability, a synthetic dataset was constructed with a sealed, 
+     known treatment effect (+4.21% relative uplift) injected into the post-intervention window.
+  </p>
+  <p>
+    Four candidate model architectures were evaluated on a 90-day pre-campaign holdout window: a seasonal-naive baseline, 
+    deterministic regression without covariates, a Gradient Boosted Decision Tree (LightGBM) leveraging control product features, 
+    and the Bayesian structural state-space model. Architectures incorporating control product series achieved superior out-of-sample
+     precision (MAPE 4.5%–5.1%). However, LightGBM was rejected for post-intervention counterfactual generation due to tree-based models' 
+     inability to extrapolate non-stationary linear trends beyond their training support.
+  </p>
+  
+  <table class="results">
+    <thead>
+      <tr><th>Candidate</th><th>Uses Controls</th><th>MAE</th><th>MAPE</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Structural, controls and weekly seasonality</strong></td><td>yes</td><td><strong>493</strong></td><td><strong>4.46%</strong></td></tr>
+      <tr><td>LightGBM, controls and calendar features</td><td>yes</td><td>540</td><td>5.05%</td></tr>
+      <tr><td>Seasonal naive, <em>t</em> − 365</td><td>no</td><td>1,903</td><td>18.04%</td></tr>
+      <tr><td>Classical OLS, calendar only</td><td>no</td><td>2,021</td><td>19.53%</td></tr>
+    </tbody>
+  </table>
+  
+  <p>
+  The above metrics provide two readings. First, incorporating dynamic controls reduces forecasting error by approximately a factor of four, 
+  dropping MAPE from ~19% down to ~5%. Second, while gradient boosting achieves competitive out-of-sample precision (MAPE 5.05%), it remains structurally 
+  invalid for counterfactual generation. Tree-based models predict constant values within each leaf, rendering them completely unable to extrapolate 
+  non-stationary linear growth trends beyond their training support. Because counterfactual projection lies entirely forward in time, valid extrapolation
+   is a requirement that holdout accuracy fails to capture. 
+  </p>
+  
+  <table class="results">
+    <thead>
+      <tr><th>Estimate Method</th><th>Relative Uplift</th><th>Cumulative Value</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>True Ground Truth</strong> (sealed validation)</td><td><strong>+4.21%</strong></td><td>€75,222</td></tr>
+      <tr><td>Structural Counterfactual Model</td><td>+4.62% · 95% CI [+0.30%, +8.91%]</td><td>€82,101</td></tr>
+      <tr><td>Naive Pre-Post Comparison</td><td>+44.80%</td><td>—</td></tr>
+      <tr><td>Naive Year-over-Year Comparison</td><td>+43.70%</td><td>—</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    The structural time-series estimator recovered the true treatment effect within 0.41 percentage points, with the 95% credible interval fully
+     covering ground truth. In contrast, naive pre-post and year-over-year comparisons overestimated campaign performance tenfold (+44.8% and +43.7%).
+  </p>
+
+  <figure>
+    <img src="assets/campaign/counterfactual.png" alt="Daily revenue with the estimated counterfactual and its 95% interval, overlaid with the true counterfactual revealed at validation.">
+    <figcaption>
+      Observed revenue plotted against structural counterfactual estimates and 95% credible intervals, benchmarked against unsealed ground truth. The model was trained exclusively on pre-intervention history; target interval bounds were derived from 4,000 posterior simulation paths.
+    </figcaption>
+  </figure>
+
+  <h2>Sensitivity Analysis &amp; Robustness Checks</h2>
+<p>
+  Evaluating estimator resilience under structural assumption violations required subjecting the pipeline to systematic falsification tests. A placebo intervention assigned to an unexposed pre-campaign period yielded an estimated uplift of +2.16% with a 95% credible interval spanning zero. This residual establishes the empirical noise floor of the state-space model, defining its minimal detectable effect size in practical deployment.
+</p>
+<p>
+  Further diagnostic checks examined temporal alignment and control pool isolation. Intentionally misspecifying the intervention start date revealed an asymmetric sensitivity profile, where lagging the assumed onset date corrupted baseline estimation far more severely than leading it. Finally, testing for violations of the Stable Unit Treatment Value Assumption (SUTVA)—by introducing synthetic treatment contamination into a single control regressor—shifted the estimated impact by 2.4 percentage points, demonstrating the necessity of rigorous control series insulation.
+</p>
+
+  <h2>Field Application: Retail Promotional Campaign</h2>
+  <p>
+    The validated framework was subsequently deployed to analyse a real-world intervention within the Rossmann retail dataset. Store 372 enrolled in a recurring promotional coupon programme on April 28, 2014, providing 69 pre-intervention and 66 post-intervention weeks. Control store selection was conducted strictly using pre-intervention correlation metrics ($r \ge 0.985$) to prevent post-treatment selection bias.
+  </p>
+
+  <figure>
+    <img src="assets/campaign/field_study.png" alt="Weekly revenue for store 372 across two years, with the estimated counterfactual and its interval after the coupon programme join date.">
+    <figcaption>
+      Two-year revenue trajectory for Store 372 against synthetic controls derived from five unexposed stores. Vertical marker indicates coupon programme initiation.
+    </figcaption>
+  </figure>
+
+  <p>
+    Cross-validation between the custom structural model and Google’s <code>CausalImpact</code> library places the effect in positive territory under both implementations: +6.1% against a range of +2.4% to +8.2%. That range is the spread across three seeds of the same fit, which is variational rather than exact; the five controls were selected for correlation with the treated store, which leaves their coefficients weakly identified and the variational optimum initialisation-dependent. The agreement therefore supports the direction of the effect rather than its magnitude.
+  </p>
+  <p>
+    However, diagnostic falsification tests on historical pre-join dates revealed statistical anomalies: pre-intervention placebo runs detected systematic negative residuals (−0.14% to −2.65%), with one period excluding zero. This pattern indicates <strong>endogenous selection into treatment</strong>—meaning stores experiencing baseline revenue dips were systematically more likely to adopt the coupon programme. Furthermore, post-treatment lift did not concentrate exclusively in active coupon distribution cycles. Consequently, the estimated uplift is reported as an upper bound rather than an unconditioned causal magnitude.
+  </p>
+
+  <h2>Reproducibility &amp; Repository Artefacts</h2>
+  <p>
+    The complete analytical pipeline is fully reproducible via an executed Jupyter notebook covering data generation, structural specification, cross-validation, sensitivity testing, and field deployment. Synthetic benchmarking datasets are programmatically generated via deterministic random seeding, and raw source files govern control group selection protocols without manual intervention.
+  </p>
+  
+  <h2>Limitations</h2>
+	<p>While synthetic validation confirms pipeline mechanics, the data generator and structural estimator share the same model family. This creates a favorable testing environment that does not measure estimator resilience against model misspecification.</p>
+	<p>Evaluating a single treated unit against five highly correlated control stores introduces collinearity, leaving individual regressor coefficients weakly identified. A single-store study also cannot cleanly separate true campaign uplift from store-specific baseline trends.</p>
+
+  <h2>Future Work</h2>
+	<p>Applying regularization shrinkage priors to control coefficients would resolve collinearity and stabilize model fitting across different random seeds.</p>
+	<p>Transitioning to a multi-unit design represents the most impact-driven extension. Evaluating multiple treated stores simultaneously allows the model to isolate true campaign uplift from store-specific temporal drift, offering a structural fix for the selection bias identified during placebo testing.</p>
+
+  <p style="margin-top:2.2rem">
+    <a class="backlink" href="index.html">← Back to the portfolio</a>
+  </p>
+</article>
+</main>
+
+<footer class="site">
+  <span>Anastasios Kontogiorgis · © 2026</span>
+  <span>
+    <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> ·
+    <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a>
+  </span>
+</footer>
+
+</div>
+</body>
+</html>

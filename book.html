@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semantic Book Recommender — Anastasios Kontogiorgis</title>
+<meta name="description" content="A content-based book recommender rebuilt around dense sentence embeddings, with a controlled ablation isolating the contribution of data enrichment from that of the encoder.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+
+<header class="site">
+  <a class="brand" href="index.html">
+    <span class="avatar">AK</span>
+    <span>Anastasios Kontogiorgis</span>
+  </a>
+  <nav class="site">
+    <a href="index.html#projects">Projects</a>
+    <a href="research.html">Research</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+<article class="research">
+  <p class="eyebrow">Applied project · Information retrieval · Complete</p>
+  <h1>Semantic Book Recommender</h1>
+  <p class="standfirst">
+    A content-based recommender over a 15,000-book catalogue, retrieved through dense
+    sentence embeddings. The evaluation is
+    structured as a controlled ablation, isolating the contribution of the enriched
+    data from that of the encoder architecture.
+  </p>
+  <p class="meta" style="font:400 .9rem var(--mono); color:var(--noise)">
+    <a href="https://anastasios-k-book-recommender.hf.space/">Live demo</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/book-recommender">Code &amp; writeup</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/book-recommender/blob/main/book_recommender_v2.ipynb">Analysis notebook</a>
+  </p>
+
+  <hr class="channel" aria-hidden="true">
+
+  <h2>The Retrieval Problem</h2>
+  <p>
+    TThe Book-Crossing dataset provides titles, authors, and ISBNs, but lack detailed content metadata. 
+    A recommender restricted to this schema must compute similarity from the title string alone. 
+    However, book titles are unreliable inputs for content matching: publisher imprints, series titles, 
+    and edition details occupy a substantial share of the tokens. Lexical matching cannot isolate these 
+    structural metadata tokens from words describing actual subject matter, causing recommendations to 
+    be driven by publishing artifacts rather than topic alignment.
+  </p>
+  <p>
+    Two interventions address this limitation. First, descriptions and subject tags are retrieved from the
+    Open Library API to supply content text where the original catalogue provides none. Second, the feature 
+    representation is shifted from sparse lexical vectors to dense sentence embeddings, ensuring vector 
+    orientation reflects semantic similarity as oposed to surface-level token overlap.
+  </p>
+  <p>
+    To isolate the impact of each change, the evaluation uses a three-way comparison. An intermediate variant 
+    applies the original lexical representation to the newly enriched text. This design makes the contributions 
+    of data enrichment and encoder architecture individually attributable, rather than confounding them in a 
+    single before-and-after metric.
+  </p>
+
+  <h2>Benchmark Results</h2>
+
+  <table class="results">
+    <thead>
+      <tr><th>Variant</th><th>Representation</th><th>Input</th><th>subject-share@5</th><th>Jaccard@5</th><th>author-match@5</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>A</strong></td><td>TF-IDF, lexical</td><td>Title only</td><td>0.128</td><td>0.018</td><td>0.011</td></tr>
+      <tr><td><strong>B</strong></td><td>TF-IDF, lexical</td><td>Title + description</td><td>0.150</td><td>0.025</td><td>0.017</td></tr>
+      <tr><td><strong>C</strong></td><td><strong>MiniLM-L6-v2, 384-d dense</strong></td><td><strong>Title + description</strong></td><td><strong>0.292</strong></td><td><strong>0.045</strong></td><td><strong>0.032</strong></td></tr>
+      <tr><td>—</td><td><em>Random baseline floor</em></td><td>—</td><td>0.020</td><td>0.002</td><td>0.000</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Measured over 500 seeded queries drawn from the 12,531 books carrying at least two
+    informative subject tags, retrieving five recommendations each. The primary metric
+    records the proportion of recommendations sharing at least one informative subject
+    with the query book.
+  </p>
+  <p>
+    Holding the representation fixed while adding the enriched description text yields a
+    17% relative improvement. Holding that text fixed while replacing lexical matching
+    with dense embeddings yields a further 95%. The architectural change therefore
+    contributes approximately five times what the data enrichment contributes, and the
+    final variant sits 14.6 times above the random floor. Splitting by query type,
+    variant C reaches 0.357 on books that carry a description against 0.239 on those
+    that do not, both remaining well clear of the floor.
+  </p>
+
+  <h2>Retrieval Behaviour</h2>
+  <p>
+    Aggregate metrics establish the direction of the improvement. Individual retrieval
+    outputs characterise it more directly, and both failure modes below are
+    representative rather than selected.
+  </p>
+
+  <table class="results">
+    <thead>
+      <tr><th>Query</th><th>Lexical (Variant A)</th><th>Semantic (Variant C)</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><em>The Hobbit</em><br><span style="color:var(--noise)">(Young Adult edition)</span></td>
+        <td><em>Bullfrog and Gertrude Go Camping</em>, <em>The Young Martial Arts Enthusiast</em>, <em>Growing Young</em></td>
+        <td><em>The Lord of the Rings</em>, <em>Lord of the Rings Trilogy</em>, <em>Tolkien: A Biography</em></td>
+      </tr>
+      <tr>
+        <td><em>Pride and Prejudice</em><br><span style="color:var(--noise)">(Everyman's Classics)</span></td>
+        <td><em>Moll Flanders</em>, <em>The Koran</em>, <em>Frankenstein</em></td>
+        <td>Two further editions of <em>Pride and Prejudice</em>, two other Austen works</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    The lexical failures are systematic rather than incidental. In the first case the
+    match is driven by the token <em>Young</em>, carried by the edition name. In the
+    second it is driven by the publisher imprint, returning five unrelated titles that
+    share only their inclusion in the Everyman Classics series. Incorporating
+    descriptions dilutes this metadata signal; semantic encoding largely eliminates it.
+  </p>
+
+  <h2>Embedding Space Structure</h2>
+
+  <figure>
+    <img src="assets/book/umap_catalogue.png" alt="UMAP projection of the 15,000-book catalogue in two dimensions, with books coloured by their dominant subject tag among the ten most frequent informative subjects.">
+    <figcaption>
+      The catalogue projected to two dimensions with UMAP, coloured by dominant subject
+      among the ten most frequent informative tags. Coherent subject regions indicate
+      that the embedding space encodes topical structure, which is the property the
+      benchmark measures numerically. The projection is exploratory: unlike the first
+      iteration, clustering plays no part in the retrieval path.
+    </figcaption>
+  </figure>
+
+  <h2>The First Iteration</h2>
+  <p>
+    An earlier version of this recommender was built on the full Book-Crossing catalogue 
+    of 271,360 records, using only the fields the dataset provides. Titles were normalised 
+    and deduplicated, represented by TF-IDF term weights and averaged Word2Vec vectors, 
+    reduced with PCA, and partitioned by K-Means into four clusters selected by elbow inspection. 
+    Recommendation proceeded by cosine similarity computed within the query book's assigned cluster, and
+    results were assessed by inspecting the retrieved lists for a handful of query
+    titles.
+  </p>
+  <p>
+    Reviewing that initial design highlighted three structural flaws. First, titles alone contain minimal 
+    content signal because imprint and edition metadata pollute the token space—a problem addressed by the 
+    Open Library enrichment. Second, restricting candidate search to a single cluster discards valid near-neighbors: 
+    with only four clusters across the catalogue, each partition contained tens of thousands of books, cutting off 
+    good candidates without significantly reducing search latency. Third, evaluating performance by manual 
+    inspection failed to catch underlying issues.
+  </p>
+  <p>
+    The third property proved to be important. When title deduplication dropped 35,080 rows from the dataset, 
+    the DataFrame index was not reset. Subsequently, non-sequential DataFrame index labels were passed into 
+    positional lookups on the feature matrix. This shifted the index references, silently pairing almost every 
+    book title with a vector belonging to a completely different book. A guard clause silently discarded labels beyond
+    the matrix bounds, suppressing the error that would otherwise have surfaced the
+    fault. As a result, 239 out of 236,280 books retained correct vector alignment; yet 
+    manual inspection of top results appeared reasonable enough that the fault went unnoticed.
+  </p>
+
+  <h2>Evaluation Design and Its Limits</h2>
+  <p>
+    Open Library subject tags serve as weak ground-truth labels. They are crowdsourced,
+    incomplete and non-standardised, so two semantically related books may carry
+    disjoint tag sets and register as a false miss. Absolute values therefore understate
+    retrieval quality, and the harness is designed as a relative comparison across
+    variants on identical queries and identical labels rather than as an estimate of
+    reader satisfaction.
+  </p>
+  <p>
+    Uninformative tags appearing on more than 5% of subject-bearing books are filtered
+    before scoring. Without that filter a shared tag such as <em>fiction</em> would
+    satisfy the metric while carrying almost no information about whether two books are
+    related.
+  </p>
+  <p>
+    The random baseline is evaluated through the exact same pipeline and queries as the model 
+    variants, establishing an empirical performance floor rather than relying on an assumed 
+    theoretical value. This empirical floor serves as a critical diagnostic component that 
+    the first iteration lacked. Without a measured baseline for comparison, silent failures—such
+     as the indexing alignment fault—can easily pass unnoticed because individual outputs appear
+      superficially plausible. A model operating near the empirical floor immediately signals a 
+      structural system failure during evaluation.
+  </p>
+
+  <h2>System Architecture</h2>
+
+  <figure>
+    <img src="assets/book/architecture.svg" alt="Pipeline diagram. The Book-Crossing catalogue and the Open Library API feed corpus construction, producing a 15,000-book enriched sample. Embedded text is built from title and description. Three representation variants branch from it, all feeding a common evaluation harness. The dense variant additionally exports precomputed artefacts, which cross an offline-to-online boundary into the deployed application.">
+    <figcaption>
+      The three representation variants branch from one corpus and one text
+      construction, so the evaluation harness compares them on identical inputs. Only
+      the selected variant continues to artefact export. The boundary marks the separation
+      that keeps the deployed service thin: all encoding happens once in the
+      notebook, and retrieval at serving time is a single inner product.
+    </figcaption>
+  </figure>
+
+  <p>
+    The evaluation corpus consists of a deterministic 15,000-book sample drawn from the 
+    deduplicated Book-Crossing catalogue. This sample was enriched using a rate-limited, 
+    resumable script targeting the Open Library API. The pipeline successfully resolved 99.9% 
+    of targeted ISBNs, returning descriptions for 37% of the books and subject tags for 91.5%.
+     For books lacking an Open Library description, the system falls back to title-only encoding.
+  </p>
+  <p>
+    Embeddings are L2-normalised so that an inner product is a cosine similarity, and
+    retrieval is exact nearest-neighbour search across the full catalogue, implemented
+    through FAISS with a NumPy fallback that returns identical results. The notebook
+    exports the catalogue and the precomputed embedding matrix, so the deployed
+    application performs no inference and requires neither PyTorch nor a runtime model
+    download.
+  </p>
+
+  <h2>Further Work</h2>
+  <p>
+    Incorporating reader ratings from the Book-Crossing dataset represents the most direct 
+    path to improving evaluation accuracy. This would support an evaluation
+    grounded in reader behaviour instead of subject tags, and a collaborative
+    component alongside the content-based one. Description coverage at 37% is the baseline, 
+    and a secondary metadata source would raise it. 
+    
+    On the retrieval side, overall ranking quality could be refined by introducing a two-stage pipeline. 
+    In this setup, candidate generation would be followed by a cross-encoder re-ranker applied to the 
+    top candidates, alongside popularity de-biasing and Maximal Marginal Relevance (MMR) to promote recommendation diversity.
+  </p>
+
+  <p style="margin-top:2.2rem">
+    <a class="backlink" href="index.html">← Back to the portfolio</a>
+  </p>
+</article>
+</main>
+
+<footer class="site">
+  <span>Anastasios Kontogiorgis · © 2026</span>
+  <span>
+    <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> ·
+    <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a>
+  </span>
+</footer>
+
+</div>
+</body>
+</html>

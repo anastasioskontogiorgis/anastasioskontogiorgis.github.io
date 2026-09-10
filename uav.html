@@ -204,11 +204,11 @@
 </article>
 </main>
 
-<footer class="site">
+<footer class="site" id="contact">
   <span>Anastasios Kontogiorgis · © 2026</span>
   <span>
     <!-- <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> · -->
-    <a href="#" id="email-link">Email</a> ·
+    <a href="javascript:void(0);" class="email-link">Email</a> ·
     <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
     <a href="https://linkedin.com/in/anastasios-kontogiorgis">LinkedIn</a> ·
     <a href="./assets/Anastasios_Kontogiorgis_CV.pdf" download="Anastasios_Kontogiorgis_CV.pdf">Download CV</a>
@@ -216,13 +216,15 @@
 </footer>
 
 <script>
-/* Spam protection */
-  document.getElementById('email-link').addEventListener('click', function(e) {
+/* Spam protection for email links */
+document.querySelectorAll('.email-link').forEach(function(element) {
+  element.addEventListener('click', function(e) {
     e.preventDefault();
     const user = 'anastasioskontogiorgis';
     const domain = 'gmail.com';
     window.location.href = 'mailto:' + user + '@' + domain;
   });
+});
 </script>
 
 

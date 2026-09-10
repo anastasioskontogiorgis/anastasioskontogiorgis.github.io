@@ -295,11 +295,24 @@
 <footer class="site">
   <span>Anastasios Kontogiorgis · © 2026</span>
   <span>
-    <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> ·
+    <!-- <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> · -->
+    <a href="contact" id="email-link">Email</a> ·
     <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
-    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a>
+    <a href="https://linkedin.com/in/anastasios-kontogiorgis">LinkedIn</a> ·
+    <a href="./assets/Anastasios_Kontogiorgis_CV.pdf" download="Anastasios_Kontogiorgis_CV.pdf">Download CV</a>
   </span>
 </footer>
+
+<script>
+/* Spam protection */
+  document.getElementById('email-link').addEventListener('click', function(e) {
+    e.preventDefault();
+    const user = 'anastasioskontogiorgis';
+    const domain = 'gmail.com';
+    window.location.href = 'mailto:' + user + '@' + domain;
+  });
+</script>
+
 
 </div>
 </body>

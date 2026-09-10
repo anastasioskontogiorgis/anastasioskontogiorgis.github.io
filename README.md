@@ -91,7 +91,6 @@ If you want to clone this repository to inspect the structure or run the static 
 
 ## Contact & Links
 
-*   **Email:** [anastasioskontogiorgis@gmail.com]
 *   **GitHub:** [@anastasioskontogiorgis](https://github.com/anastasioskontogiorgis)
-*   **LinkedIn:** [www.linkedin.com/in/anastasios-kontogiorgis-830a23434]
-*   **ORCID:** [https://orcid.org/0000-0003-4921-3835]
+*   **LinkedIn:** www.linkedin.com/in/anastasios-kontogiorgis
+*   **ORCID:** https://orcid.org/0000-0003-4921-3835

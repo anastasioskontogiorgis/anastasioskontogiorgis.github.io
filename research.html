@@ -9,6 +9,36 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+
+<!-- 
+<style>
+/* Wide diagrams stay legible on narrow screens: scroll horizontally */
+figure.wide { 
+  margin-inline: 0; 
+}
+
+figure.wide .scroll { 
+  overflow-x: auto; 
+  -webkit-overflow-scrolling: touch; 
+  width: 100%;
+  display: flex; /* Kept so that margins calculate properly */
+}
+
+figure.wide .scroll img { 
+  max-width: none !important; 
+  width: 1400px; /* Controlled readable size */
+  height: auto;
+  flex-shrink: 0; 
+  display: block; 
+  
+  /* SAFE CENTERING: This perfectly centers the image on large screens,
+     but if the screen shrinks, it gracefully defaults to left-aligned 
+     so nothing gets cut off and you can scroll to the left edge perfectly. */
+  margin-inline: auto; 
+}
+</style> -->
+
+
 </head>
 <body>
 <div class="wrap">
@@ -20,6 +50,7 @@
   <nav class="site">
     <a href="index.html#projects">Projects</a>
     <a href="research.html">Research</a>
+    <a href="uav.html">UAV Swarm</a>
     <a href="index.html#contact">Contact</a>
   </nav>
 </header>
@@ -33,8 +64,8 @@
 	adapts its communication configuration based on the underlying environmental topology.
   </p>
   <p class="meta" style="font:400 .9rem var(--mono); color:var(--noise)">
-    <a href="https://orcid.org/0000-0003-4921-3835">ORCID 0000-0003-4921-3835</a> ·
-    <a href="https://github.com/anastasioskontogiorgis/channel-robust-emergent-communication">Benchmark framework code</a>
+    <a href="https://orcid.org/0000-0003-4921-3835">ORCID</a> ·
+    <a href="https://github.com/anastasioskontogiorgis/channel-robust-emergent-communication">Publication experimental framework </a>
   </p>
 
   <hr class="channel" aria-hidden="true">
@@ -57,34 +88,146 @@
 
   <h2>Empirical Baseline Vulnerability</h2>
   <p>
-    My <a href="#publications">initial publications</a> systematically evaluated state-of-the-art emergent-communication architectures (CommNet, IC3Net, TarMAC, GA-Comm, MAGIC) under realistic synthetic channel disruptions, including additive noise, partial and full packet loss, latency and message jumbling, on an unsignalised-intersection benchmark. 
+    My <a href="#publications">initial publications</a> systematically evaluated state-of-the-art emergent-communication architectures (CommNet, IC3Net, TarMAC, GA-Comm, MAGIC) under realistic synthetic channel disruptions, including additive noise, partial and full packet loss, latency and message jumbling, on an unsignalised-intersection benchmark. Figure 1 shows the three difficulty levels of the simulation enviroment. 
   </p>
-  <p>
-    The empirical findings revealed a real vulnerability: while baseline models tolerated low-intensity additive noise, even modest packet loss and temporal disruptions triggered sharp success-rate degradation out of proportion to the noise severity, concentrated heavily in high-density, safety-critical traffic states. Demonstrating this systemic degradation provided the empirical evidence that motivated the shift toward developing a dedicated, noise-robust architecture: NoisyGraph.
+  
+  <figure class="wide">
+  	<div class="scroll">
+    	<div class="image-overlay-wrapper">
+  <img src="assets/research/intersection_levels.png"
+  		class="lightbox-trigger" 
+         	style="cursor: zoom-in;"
+       	alt="The three intersection difficulty levels: easy, a single pair of one-way lanes; medium, two bidirectional lanes on a larger grid; hard, four bidirectional lanes with many vehicles.">
+<figcaption><strong>Figure 1.</strong> The three difficulty levels: (a) easy, a 7&nbsp;&times;&nbsp;7 grid of two one-way lanes with at most 5 vehicles; (b) medium, a 14&nbsp;&times;&nbsp;14 grid of two bidirectional lanes with at most 10 vehicles; (c) hard, an 18&nbsp;&times;&nbsp;18 grid of four bidirectional lanes with at most 20 vehicles. Difficulty rises with grid size, the number of lanes and the vehicle count, while agent visibility stays fixed at one cell in every setting. Adapted from Singh et al. (2018).
+ <span class="click-hint">(Click image to enlarge)</span>
+</figcaption>
+</figure>
+
+  <div class="exp-scroll">
+<table class="exp-table">
+  <caption><strong>Table 1.</strong> Success rate (%) at the hard setting, clean channel against four communication disturbances.</caption>
+  <colgroup>
+    <col style="width:20%">
+    <col style="width:16%">
+    <col style="width:16%">
+    <col style="width:16%">
+    <col style="width:16%">
+    <col style="width:16%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Model</th>
+      <th>Clean</th>
+      <th>Gaussian Noise</th>
+      <th>Combined Loss</th>
+      <th>Jumbling</th>
+      <th>Delay</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>MAGIC</strong></td>
+      <td>96.6</td>
+      <td>86.6</td>
+      <td>86.6</td>
+      <td>88.0</td>
+      <td>84.1</td>
+    </tr>
+    <tr class="alt">
+      <td><strong>GA-Comm</strong></td>
+      <td>93.7</td>
+      <td>88.0</td>
+      <td>78.0</td>
+      <td>75.0</td>
+      <td>70.0</td>
+    </tr>
+    <tr>
+      <td><strong>TarMAC</strong></td>
+      <td>87.7</td>
+      <td>80.0</td>
+      <td>78.0</td>
+      <td>75.0</td>
+      <td>70.0</td>
+    </tr>
+    <tr class="alt">
+      <td><strong>IC3Net</strong></td>
+      <td>87.6</td>
+      <td>65.8</td>
+      <td>57.9</td>
+      <td>61.2</td>
+      <td>58.7</td>
+    </tr>
+    <tr>
+      <td><strong>CommNet</strong></td>
+      <td>74.0</td>
+      <td>52.3</td>
+      <td>44.3</td>
+      <td>47.7</td>
+      <td>45.1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+ <p>
+    The empirical findings, summarised in Table 1, revealed a real vulnerability: while baseline models tolerated low-intensity additive noise, packet loss and temporal disruptions triggered sharp success-rate degradation out of proportion to the noise severity, concentrated heavily in high-density, safety-critical traffic states. Demonstrating this systemic degradation provided the empirical evidence that motivated the shift toward developing a dedicated, noise-robust architecture:: <strong>NoisyGraph</strong>.
   </p>
+  
+  <p><a href="https://github.com/anastasioskontogiorgis/channel-robust-emergent-communication">
+Publication experimental framework
+&rarr;</a></p>
+
 
   <h2>Taxonomy of Multi-Agent Noise</h2>
   <p>
-    To formalise these vulnerabilities, I conducted a systematic survey of noise in multi-agent reinforcement learning (under review at JAAMAS). This work proposes a five-category taxonomy of noise sources, ranging from exploration stochasticity to channel interference, and synthesises mitigation strategies across the literature. The analysis identifies emergent communication as the most robust theoretical framework for addressing the two most intractable categories: environmental occlusion and communication channel degradation.
+    To formalise these vulnerabilities, I conducted a systematic survey of noise in multi-agent reinforcement learning (under review at JAAMAS). This work proposes a five-category taxonomy of noise sources, ranging from exploration stochasticity to channel interference, and synthesises mitigation strategies across the literature. The analysis identifies emergent communication as the most robust theoretical framework for addressing the two most intractable categories: environmental occlusion and communication channel degradation. Figure 2 presents the taxonomy.
+  </p>
+ 
+  <figure class="wide">
+    <div class="scroll">
+    	<div class="image-overlay-wrapper">
+      	<img src="assets/research/noise-taxonomy.png"
+      	   	class="lightbox-trigger" 
+         	style="cursor: zoom-in;"
+           	alt="Taxonomy tree of noise in multi-agent reinforcement learning. The root node, noise in MARL, branches into five categories: exploration noise, 
+           	communication noise, environmental noise, observation noise and the white-noise problem. Each category traces down through problem manifestations 
+           	to underlying causes such as action perturbation, noisy links, partial observability and sensor limitations.">
+    	</div>
+    </div>
+    <figcaption>
+    	<strong>Figure 2.</strong> Taxonomy of noise in multi-agent reinforcement learning. Elements are organised into three levels, read from the bottom upwards: 	underlying causes, problem manifestations, and noise categories, which converge on the root. Solid arrows show causal influence; dashed cross-links mark causes that feed more than one manifestation, as when low correlation with the true environment state produces both environmental noise and Shannon's semantic problem. The diagram traces how fundamental factors propagate into distinct categories of noise.
+    	 <span class="click-hint">(Click image to enlarge)</span>
+    	</figcaption>
+  </figure>
+
   </p>
 
   <h2>The NoisyGraph Framework</h2>
   <p>
-    The core contribution of the thesis is <strong>NoisyGraph</strong>, an adaptive, reliability-aware emergent-communication architecture developed across three phases. Each phase targets a distinct layer of the communication pipeline and is evaluated on the most demanding configuration of the intersection benchmark (18×18 grid, up to 20 vehicles, partial observability).
+    The core contribution of the thesis is <strong>NoisyGraph</strong>, an adaptive, reliability-aware emergent-communication architecture developed across three phases. Each phase targets a distinct layer of the communication pipeline and is evaluated on the most demanding configuration of the intersection benchmark (18×18 grid, up to 20 vehicles, partial observability). Figure 3 shows the complete pipeline as it stands after the third phase.
   </p>
 
-  <figure>
+    <figure class="wide">
+    <div class="scroll">
+    	<div class="image-overlay-wrapper">
     <img src="assets/research/phase_3_System_Overview.png"
+    	class="lightbox-trigger" 
+         	style="cursor: zoom-in;"
          alt="NoisyGraph-RC two-stage execution pipeline diagram: observation encoding, channel noise injection, autoencoder reliability estimation, reliability-aware GAT stacks, and policy heads.">
-    <figcaption>NoisyGraph-RC execution pipeline and two-stage training scheme. Stage 1 optimises policy and feature representation weights (<math><msub><mi>θ</mi><mtext>frozen</mtext></msub></math>) in clean environments. Stage 2 freezes the coordination policy and fine-tunes only the calibratable parameters (<math><msub><mi>θ</mi><mtext>calib</mtext></msub></math>$), namely the autoencoder noise detector, the reliability-aware GAT schedulers and the message encoders, under active per-hop channel noise injection.</figcaption>
+       </div>
+    </div>
+    <figcaption><strong>Figure 3.</strong> NoisyGraph-RC execution pipeline and two-stage training scheme. Stage 1 optimises policy and feature representation weights (<math><msub><mi>θ</mi><mtext>frozen</mtext></msub></math>) in clean environments. Stage 2 freezes the coordination policy and fine-tunes only the calibratable parameters (<math><msub><mi>θ</mi><mtext>calib</mtext></msub></math>), namely the autoencoder noise detector, the reliability-aware GAT schedulers and the message encoders, under active per-hop channel noise injection.
+     <span class="click-hint">(Click image to enlarge)</span>
+    </figcaption>
   </figure>
+
 
   <h3>Phase I: Spatially Adaptive Topology Construction</h3>
   <p>
     Prior emergent-communication frameworks rest on three architectural assumptions: a fixed connectivity structure, whether global broadcast or an always-complete graph, a predetermined number of communication rounds, and a static mapping from rounds to processing layers. Each has a cost. In sparse configurations the fixed structure cannot extend reach far enough to cover the agent spread, leaving critical information out of range. In dense clusters an always-complete graph propagates redundant messages across every pair at once, diluting informative signals and loading the attention mechanism unnecessarily. And a static round-to-layer mapping decouples computational depth from the actual complexity of the configuration at each step.
   </p>
   <p>
-    NoisyGraph replaces these priors with a spatially grounded architecture. At each environment step it records the physical coordinates of all active agents and constructs a dynamic communication graph, linking pairs within a proximity threshold directly and connecting more distant pairs through relay chains of intermediate agents whose separations fall within a hop-distance budget. The construction simultaneously determines <math><msub><mi>H</mi><mtext>opt</mtext></msub></math>, the minimum hop count required to span the farthest agent pair, which then dictates how many hop-specific graph-attention layers are activated for that step. Communication rounds and processing layers stand in one-to-one correspondence, both derived from the instantaneous geometry of the scene.
+    NoisyGraph replaces these priors with a spatially grounded architecture. At each environment step it records the physical coordinates of all active agents and constructs a dynamic communication graph, linking pairs within a proximity threshold directly and connecting more distant pairs through relay chains of intermediate agents whose separations fall within a hop-distance budget. The construction simultaneously determines <math><msub><mi>H</mi><mtext>opt</mtext></msub></math>, the minimum hop count required to span the farthest agent pair, which then dictates how many hop-specific graph-attention layers are activated for that step. Communication rounds and processing layers stand in one-to-one correspondence, both derived from the instantaneous geometry of the scene. Figure 4 illustrates the adaptation.
   </p>
   <p>
     The design serves a second purpose beyond efficiency. Every additional hop is an opportunity for distortion to accumulate, so avoiding excessive hops reduces the area over which noise can propagate before any explicit reliability estimation is applied. Phase I therefore establishes the foundation on which the later mechanisms operate.
@@ -93,10 +236,18 @@
     <strong>Result.</strong> Evaluated on the standard non-signalised intersection benchmark at the Hard difficulty setting, an 18×18 grid with up to 20 agents and limited visibility, NoisyGraph achieves an <strong>89.88% collision-free success rate against 88.46% for MAGIC, 87.55% for IC3Net and 74.00% for CommNet</strong>. Inter-agent distance correlates with the dynamically computed <math><msub><mi>H</mi><mtext>opt</mtext></msub></math> at <math><mi>r</mi><mo>=</mo><mn>0.82</mn></math>, confirming that communication depth adapts in a geometry-aware manner.
   </p>
 
-  <figure>
+  <figure class="wide">
+   <div class="scroll">
+    	<div class="image-overlay-wrapper">
     <img src="assets/research/phase_1_adaptive_topology_comm_depth.png"
+    		class="lightbox-trigger" 
+         	style="cursor: zoom-in;"
          alt="Diagram of adaptive communication topology: relay chains bridging distant agents on a grid, and a GAT layer stack where only the needed hop depth is active.">
-    <figcaption>Topology adaptation. Sparse configurations extend communication reach through multi-hop relay chains, while dense clusters restrict propagation. Network depth maps directly to spatial geometry.</figcaption>
+          </div>
+    </div>
+    <figcaption><strong>Figure 4.</strong> Topology adaptation. Sparse configurations extend communication reach through multi-hop relay chains, while dense clusters restrict propagation. Network depth maps directly to spatial geometry.
+    <span class="click-hint">(Click image to enlarge)</span>
+    </figcaption>
   </figure>
 
   <h3>Phase II: Unsupervised Reliability Estimation</h3>
@@ -107,25 +258,192 @@
     An autoencoder-based detector processes each outgoing message and computes its reconstruction error against the learnt manifold of typical messages, treating messages that are difficult to reconstruct as likely to carry unreliable content. The error is converted into a per-message reliability score and integrated into the attention mechanism through a reliability-weighted fusion, with the attention logits modulated by a scaled log-reliability term so that unreliable messages are down-weighted in neighbour selection and feature aggregation alike. The approach requires no labelled examples of corruption, and it detects distortion at the message level after encoding rather than at the observation stage.
   </p>
   <p>
-    <strong>Result.</strong> As vehicle count and occlusion increase, NoisyGraph-R reduces performance degradation by <strong>19 to 29% relative to baselines</strong>. In the cluttered regime it holds <strong>89.64% success at 7.23% degradation, against 8.97% for the base model and 10.23% for MAGIC</strong>. Reconstruction error correlates with agent density at $\rho = 0.9187$ and with task success at <math><mi>ρ</mi><mo>=</mo><mo>−</mo><mn>0.8809</mn></math>, confirming that the detector responds to environmentally induced corruption and that the corruption it finds is task-relevant.
+    <strong>Result.</strong> As vehicle count and occlusion increase, NoisyGraph-R reduces performance degradation by <strong>19 to 29% relative to baselines</strong>. In the cluttered regime it holds <strong>89.64% success at 7.23% degradation, against 8.97% for the base model and 10.23% for MAGIC</strong>. Reconstruction error correlates with agent density at &rho; = 0.9187 and with task success at <math><mi>ρ</mi><mo>=</mo><mo>−</mo><mn>0.8809</mn></math>, confirming that the detector responds to environmentally induced corruption and that the corruption it finds is task-relevant.
   </p>
 
   <h3>Phase III: Channel Calibration via Representation Fine-Tuning</h3>
   <p>
-    Phase III extends the same reliability pathway to <em>channel noise</em>, meaning corruption introduced during transmission. NoisyGraph-RC adopts a two-stage strategy. The reinforcement-learning policy is first trained under reliable communication, and a targeted calibration phase then fine-tunes only the reliability-specific parameters, namely the autoencoder and a subset of the graph-attention reliability weights, under a configurable mixture of six impairment types: additive noise, SNR-based fading, burst errors, packet drops, delays and message jumbling.
+    Phase III extends the same reliability pathway to <em>channel noise</em>, meaning corruption introduced during transmission. NoisyGraph-RC adopts a two-stage strategy. The reinforcement-learning policy is first trained under reliable communication, and a targeted calibration phase then fine-tunes only the reliability-specific parameters, namely the autoencoder and a subset of the graph-attention reliability weights, under a configurable mixture of six impairment types: <b>additive noise, SNR-based fading, burst errors, packet drops, delays and message jumbling</b>.
   </p>
   <p>
     Separating the two stages preserves the coordination policy learnt under clean conditions while allowing the autoencoder to learn the reconstruction patterns characteristic of channel-induced corruption. One detection pathway therefore covers both semantic and channel noise.
   </p>
   <p>
-    <strong>Result.</strong> Across eleven validation scenarios spanning all six impairment types, NoisyGraph-RC maintains an <strong>88.34% average collision-free success rate against 79.45% for the base model and 74.47% for MAGIC</strong>. Degradation grows gracefully with severity, at 2.69%, 4.51% and 7.65% for light, moderate and severe intensities. Under worst-case combined stress, with simultaneous burst errors, low SNR and packet loss, it holds <strong>74.37% against 56.90% for the strongest baseline</strong>. Ten of the eleven configurations stay within acceptable margins, and that combined-stress case is the only one to exceed the robustness threshold, which marks multi-source corruption as the open problem.
+    <strong>Result.</strong> Across eleven validation scenarios spanning all six impairment types, NoisyGraph-RC maintains an <strong>88.34% average collision-free success rate against 79.45% for the base model and 74.47% for MAGIC</strong>. Degradation grows gracefully with severity, at 2.69%, 4.51% and 7.65% for light, moderate and severe intensities. Under worst-case combined stress, with simultaneous burst errors, low SNR and packet loss, it holds <strong>74.37% against 56.90% for the strongest baseline</strong>. As Figure 5 shows, ten of the eleven configurations stay within acceptable margins, and that combined-stress case is the only one to exceed the robustness threshold, which marks multi-source corruption as the open problem.
   </p>
 
-  <figure>
+  <figure class="wide">
+   <div class="scroll">
+    	<div class="image-overlay-wrapper">
     <img src="assets/research/phase3_fig3_robustness_heatmap.png"
+    	class="lightbox-trigger" 
+         style="cursor: zoom-in;"
          alt="Heatmap of NoisyGraph-RC success rates across eleven validation scenarios and three noise intensities, mostly green with graceful decline toward severe combined stress.">
-    <figcaption>NoisyGraph-RC success retention across validation scenarios and impairment intensities.</figcaption>
+        </div>
+    </div>   
+    <figcaption><strong>Figure 5.</strong> NoisyGraph-RC success retention across validation scenarios and impairment intensities.
+     <span class="click-hint">(Click image to enlarge)</span>
+    </figcaption>
   </figure>
+ 
+ 
+ <style>
+ /* exp design table styling */ 
+.exp-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.exp-table { width: 100%; min-width: 640px; border-collapse: collapse;
+             font-size: .92rem; line-height: 1.45; }
+.exp-table caption { caption-side: top; text-align: left; margin-bottom: .7rem; }
+.exp-table th, .exp-table td { text-align: left; vertical-align: top; padding: .62rem .75rem; }
+.exp-table thead th { font-weight: 600; border-bottom: 2px solid rgba(128,128,128,.55);
+                      letter-spacing: .02em; }
+.exp-table tbody td { border-bottom: 1px solid rgba(128,128,128,.18); }
+.exp-table tbody tr.phase-start > td { border-top: 2px solid rgba(128,128,128,.45); }
+.exp-table tbody tr.alt > td { background: rgba(128,128,128,.06); }
+.exp-table .phase { font-weight: 600; white-space: nowrap; vertical-align: middle; }
+.exp-table .exp { font-weight: 600; }
+</style>
+
+<p>
+To synthesise the key architectural milestones and performance gains developed across all three phases, Table 2 provides a consolidated comparison of NoisyGraph against baseline frameworks.
+</p>
+
+<div class="exp-scroll">
+<table class="exp-table">
+  <caption><strong>Table 2.</strong> Executive summary of the NoisyGraph architecture progression, core mechanisms, and key performance outcomes across the three thesis phases.</caption>
+  <colgroup>
+    <col style="width:15%">
+    <col style="width:20%">
+    <col style="width:20%">
+    <col style="width:20%">
+    <col style="width:25%">
+  </colgroup>
+  <thead>
+    <tr>
+      <th>Phase</th>
+      <th>Core Mechanism</th>
+      <th>Primary Validation Environment</th>
+      <th>Key Performance Outcome</th>
+      <th>Baseline Comparison</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>I. NoisyGraph</strong></td>
+      <td>Spatially Adaptive Topology (H<sub>opt</sub>)</td>
+      <td>18&times;18 grid, limited visibility (Hard)</td>
+      <td><strong>89.88%</strong> collision-free success rate</td>
+      <td>Outperforms MAGIC (88.46%), IC3Net (87.55%), CommNet (74.00%)</td>
+    </tr>
+    <tr class="alt">
+      <td><strong>II. NoisyGraph-R</strong></td>
+      <td>Unsupervised Reliability Estimation</td>
+      <td>Cluttered regime (Semantic Noise)</td>
+      <td><strong>89.64%</strong> success with only 7.23% degradation</td>
+      <td>Reduces performance degradation by <strong>19&ndash;29%</strong> relative to baselines</td>
+    </tr>
+    <tr>
+      <td><strong>III. NoisyGraph-RC</strong></td>
+      <td>Representation Fine-Tuning</td>
+      <td>6 impairment types (Channel Noise)</td>
+      <td><strong>88.34%</strong> average success across impairments</td>
+      <td>Outperforms Base (79.45%) and MAGIC (74.47%); holds <strong>74.37%</strong> under combined stress</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+ 
+<h2>Experimental Design Overview</h2>
+
+<p>
+  To ensure a rigorous and fair comparison, all architectures were evaluated under a standardised protocol using identical hyperparameter baselines:
+</p>
+
+<ul>
+  <li><strong>Optimization:</strong> RMSProp with a learning rate of 1&times;10<sup>&minus;3</sup> and a batch size of 500.</li>
+  <li><strong>Architecture:</strong> 128-dimensional LSTM hidden states and message sizes.</li>
+  <li><strong>Constraints:</strong> Agent vision limited to one cell to promote communication.</li>
+  <li><strong>Communication:</strong> Set to two rounds; empirically, this setting produced higher success rates for non-communication-adaptive baseline models.</li>
+</ul>
+
+<p>
+  Every configuration was trained across four random seeds and evaluated over 1,000 episodes on a frozen policy using identical episode sequences. Phase I used the four seeds to select the best-converged model for evaluation, a criterion applied identically to the baselines, while Phase III reported across all four, producing 4,000 evaluation episodes per configuration.
+</p>
+
+<p>
+  MAGIC was deployed with its topology scheduler enabled (unlike the original study's configuration for this task). This structural adjustment ensures the experiment directly evaluates two learned topologies against one another, rather than comparing adaptive communication against simple all-to-all connectivity.
+</p>
+
+<p>
+  While these core settings were globally standardised to guarantee a fair baseline, individual phases introduced modular components, such as auto-encoders, reliability scoring, reliability-aware GAT layers, and specialised calibration optimisers, that required phase-specific parameters. Similarly, training schedules and durations were adapted dynamically based on task difficulty and the specific mechanisms under test. The optimisation objective remained balanced: maintaining rigorous standardisation, while tuning phase-specific parameters to ensure every model performed at highest potential.
+</p>
+
+<p>
+While the previous sections highlight the primary performance milestones, the full validation of the NoisyGraph architecture spans nine distinct experiments. Table 2, summarises the experimental framework pairing each underlying hypothesis with its corresponding evaluation metric.
+</p>
+
+<div class="exp-scroll">
+<table class="exp-table">
+  <caption><strong>Table 2.</strong> Overview of the experimental framework, detailing the core hypotheses and corresponding evaluation metrics by phase.</caption>
+  <colgroup>
+    <col style="width:7%"><col style="width:21%"><col style="width:39%"><col style="width:33%">
+  </colgroup>
+  <thead>
+    <tr><th>Phase</th><th>Experiment</th><th>Hypothesis</th><th>Evaluation Metric</th></tr>
+  </thead>
+  <tbody>
+    <tr class="phase-start">
+      <td class="phase" rowspan="4">I</td>
+      <td class="exp">Comparative performance</td>
+      <td>Combining adaptive topology, hop selection, and processing depth outperforms architectures built on static assumptions.</td>
+      <td>Success rate and episode reward across three difficulty levels.</td>
+    </tr>
+    <tr>
+      <td class="exp">Spatial grounding</td>
+      <td>Communication depth dynamically adapts to scene geometry, with sparse environments triggering deeper multi-hop exchange.</td>
+      <td>Correlation between inter-agent distance and <math><msub><mi>H</mi><mtext>opt</mtext></msub></math>.</td>
+    </tr>
+    <tr>
+      <td class="exp">Connectivity and efficiency</td>
+      <td>Learned gating suppresses non-essential links while preserving safety-critical connections.</td>
+      <td>Gating efficiency ratio and communication load per agent.</td>
+    </tr>
+    <tr>
+      <td class="exp">Depth ablation</td>
+      <td>Adaptive depth offers superior stability and better worst-case performance compared to fixed two-hop and three-hop variants.</td>
+      <td>Converged success rate, variance across epochs and seeds, and min/max ranges.</td>
+    </tr>
+ 
+    <tr class="phase-start alt">
+      <td class="phase" rowspan="2">II</td>
+      <td class="exp">Performance under semantic stress</td>
+      <td>Reliability weighting mitigates performance degradation as agent density and occlusion increase.</td>
+      <td>Success rate across sparse, transition, and cluttered regimes.</td>
+    </tr>
+    <tr class="alt">
+      <td class="exp">Estimator validation</td>
+      <td>Reconstruction error correlates positively with agent density and negatively with overall task success.</td>
+      <td>Correlation coefficients, evaluating against a predefined threshold of <math><mi>ρ</mi><mo>&gt;</mo><mn>0.5</mn></math>.</td>
+    </tr>
+ 
+    <tr class="phase-start">
+      <td class="phase" rowspan="3">III</td>
+      <td class="exp">Calibration effectiveness</td>
+      <td>Robustness to channel noise improves without introducing performance drift under clean-channel conditions.</td>
+      <td>Performance gain over the uncalibrated model, using clean-scenario parity as a baseline check.</td>
+    </tr>
+    <tr>
+      <td class="exp">Heterogeneous robustness</td>
+      <td>Performance degradation scales progressively rather than catastrophically, generalizing beyond the calibration curriculum.</td>
+      <td>Success drop across 11 scenarios at three intensity levels, including combined-stress worst cases.</td>
+    </tr>
+    <tr>
+      <td class="exp">Unified reliability</td>
+      <td>A unified detector successfully identifies corruption originating from both environmental and transmission sources.</td>
+      <td>Reconstruction error and reliability distributions under semantic, channel, and combined noise profiles.</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
   <h2>Translational Impact &amp; Industry Applicability</h2>
   <p>
@@ -145,28 +463,30 @@
       <em>European Journal of Artificial Intelligence</em>, ATT 2024 Special Issue — In final review, DOI pending.
     </li>
     <li>
-      <strong>Noise in Multi-Agent Reinforcement Learning and Emergent Communication: A Systematic Taxonomy and Survey of Challenges and Solutions.</strong><br>
-      Under review, <em>Autonomous Agents and Multi-Agent Systems</em> (JAAMAS).
-    </li>
-    <li>
       <strong>CAV Unsignalised Intersection Crossing with Unreliable Emergent Communication.</strong><br>
       <em>ATT'24: Workshop on Agents in Traffic and Transportation</em>, Santiago de Compostela, 2024 —
       <a href="https://ceur-ws.org/Vol-3813/5.pdf">Open access (CEUR)</a>.
     </li>
+     <li>
+      <strong>Noise in Multi-Agent Reinforcement Learning and Emergent Communication: A Systematic Taxonomy and Survey of Challenges and Solutions.</strong><br>
+      Under review, <em>Autonomous Agents and Multi-Agent Systems</em> (JAAMAS).
+    </li>
     <li>
-      <strong>Thesis:</strong> <em>Channel-Robust Emergent Communication: Mitigating Complex Network Distortions via Reliability-Aware Graph Attention.</em> Trinity College Dublin, submitted March 2026 (Under examination).
+      <strong>Thesis:</strong> <em>Channel-Robust Emergent Communication: Mitigating Complex Network Distortions via Reliability-Aware Graph Attention.</em> Trinity College Dublin, submitted May 2026 (Under examination).
     </li>
   </ul>
+  
 
-  <p style="margin-top:2.2rem">
-    <a class="backlink" href="index.html">← Back to the portfolio</a>
+   <p class="plinks" style="margin-top:2.2rem">
+    <a href="index.html">← Back to the portfolio</a>
+    <a href="uav.html">UAV Swarm</a>
   </p>
+  
 </article>
 
 <footer class="site" id="contact">
   <span>Anastasios Kontogiorgis · © 2026</span>
   <span>
-    <!-- <a href="mailto:anastasioskontogiorgis@gmail.com">anastasioskontogiorgis@gmail.com</a> · -->
     <a href="javascript:void(0);" class="email-link">Email</a> ·
     <a href="https://github.com/anastasioskontogiorgis">GitHub</a> ·
     <a href="https://linkedin.com/in/anastasios-kontogiorgis">LinkedIn</a> ·
@@ -187,5 +507,46 @@ document.querySelectorAll('.email-link').forEach(function(element) {
 </script>
 
 </div>
+
+<!-- Lightbox Overlay Container -->
+<div id="lightbox" class="lightbox">
+  <span class="lightbox-close">&times;</span>
+  <img class="lightbox-content" id="lightbox-img" alt="Enlarged taxonomy diagram">
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const closeBtn = document.querySelector('.lightbox-close');
+
+  // Open lightbox when clicking any image with the trigger class
+  document.querySelectorAll('.lightbox-trigger').forEach(img => {
+    img.addEventListener('click', function() {
+      lightbox.style.display = 'flex';
+      lightboxImg.src = this.src;
+    });
+  });
+
+  // Close lightbox when clicking the (X) button
+  closeBtn.addEventListener('click', () => {
+    lightbox.style.display = 'none';
+  });
+
+  // Close lightbox when clicking anywhere on the dark background
+  lightbox.addEventListener('click', function(e) {
+    if (e.target === lightbox) {
+      lightbox.style.display = 'none';
+    }
+  });
+
+  // Close lightbox smoothly using the Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && lightbox.style.display === 'flex') {
+      lightbox.style.display = 'none';
+    }
+  });
+});
+</script>
+
 </body>
 </html>

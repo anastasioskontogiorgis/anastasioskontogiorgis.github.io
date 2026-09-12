@@ -60,8 +60,8 @@ If you want to clone this repository to inspect the structure or run the static 
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com
-   cd anastasioskontogiorgis.github.io
+  	git clone https://github.com/anastasioskontogiorgis/anastasioskontogiorgis.github.io.git
+       cd anastasioskontogiorgis.github.io
    ```
 
 2. **Run a local static server:**

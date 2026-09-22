@@ -180,9 +180,8 @@ Publication experimental framework
 
   <h2>Taxonomy of Multi-Agent Noise</h2>
   <p>
-    To formalise these vulnerabilities, I conducted a systematic survey of noise in multi-agent reinforcement learning (under review at JAAMAS). This work proposes a five-category taxonomy of noise sources, ranging from exploration stochasticity to channel interference, and synthesises mitigation strategies across the literature. The analysis identifies emergent communication as the most robust theoretical framework for addressing the two most intractable categories: environmental occlusion and communication channel degradation. Figure 2 presents the taxonomy.
-  </p>
- 
+   To formalise these vulnerabilities, I conducted a systematic survey of noise in multi-agent reinforcement learning (under review at JAAMAS). This work proposes a five-category taxonomy of noise sources, ranging from exploration stochasticity to channel interference, and synthesises mitigation strategies across the literature. For each category, it traces the underlying causes and their manifestations in multi-agent learning. Figure 2 illustrates these relationships by separating the underlying causes of noise from their observed manifestations, while highlighting cases where a single source can contribute to multiple forms of degradation.
+</p>
   <figure class="wide">
     <div class="scroll">
     	<div class="image-overlay-wrapper">
@@ -199,8 +198,14 @@ Publication experimental framework
     	 <span class="click-hint">(Click image to enlarge)</span>
     	</figcaption>
   </figure>
-
   </p>
+  
+  <p>
+The analysis identifies emergent communication as a particularly relevant response to environmental and communication noise, as agents can learn a ‘language’ that helps overcome relatively simple noise and maintain coordination in easier tasks. The review therefore asks whether learned communication can remain effective under more complex environments and noisy channels, and whether the resulting policies remain robust and scalable. It also identifies the need for noise-aware evaluation metrics and communication architectures that can account for unreliable information.
+</p>
+<p>
+These findings motivate the development of NoisyGraph, which addresses these challenges by making the communication process explicitly aware of both environmental structure and message reliability, instead of treating all communicated information as equally reliable.
+</p>
 
   <h2>The NoisyGraph Framework</h2>
   <p>

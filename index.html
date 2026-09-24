@@ -51,7 +51,7 @@
 </p>
 
 <p class="lede">
-  My work emphasises methodological rigor: identifying baseline failure modes,
+  My work emphasises methodological rigour: identifying baseline failure modes,
   diagnosing dataset biases, and measuring performance against grounded evaluation protocols.
 </p>
  
@@ -128,9 +128,7 @@
         architecture can generalise from the constrained geometry of an intersection to a mobile swarm. The UAV swarm must cover an unknown area while maintaining
 	link topology under unreliable communication conditions. In the current phase, four seeded runs 
 	demonstrate that the architecture does not transfer unchanged. While a staged reward curriculum improves swarm dispersion to a 73.2% coverage peak, 
-	performance collapses late in training. Diagnostic analysis isolated two root causes: unconstrained policy updates and a checkpointing criterion that
-	 selected for unstable performance spikes over balanced trajectories, each pointing to a specific 
-	architectural change for the next phase. 
+	performance collapses late in training. Diagnostic analysis isolated three root causes: unconstrained policy updates, interference between objectives within a single scalar reward, and a checkpointing criterion that selected unstable performance spikes over balanced trajectories
       </p>
       <ul class="tags"><li>PyTorch</li><li>multi-agent RL</li><li>graph attention</li><li>emergent communication</li><li>reward design</li></ul>
       <p class="plinks">
@@ -168,7 +166,7 @@
     <div>
       <h3>Production Phishing Detection Service</h3>
       <p>
-        A containerised FastAPI service for phishing classification, built alongside rigorous evaluation protocols. Deduplicating the training corpus prior to splitting eliminated a data leakage 	path that artificially inflated accuracy by 0.5%. Inspecting feature coefficients revealed that legitimate emails were partly identified by historical provenance; when evaluated against a 	contemporary test set, accuracy dropped from 0.980 to 0.833 while class separation contracted by two-thirds. The deployed service returns calibrated probabilities for flexible thresholding 		and logs privacy-preserving prediction metrics to detect real-world drift.
+        A containerised FastAPI service for phishing classification, built alongside rigorous evaluation protocols. Deduplicating the training corpus prior to splitting eliminated a data leakage 	path that artificially inflated accuracy by approximately half a percentage point. Inspecting feature coefficients revealed that legitimate emails were partly identified by historical provenance. On a probe set of contemporary emails, accuracy dropped from 0.980 to 0.833 and class separation more than halved. The deployed service returns calibrated probabilities for flexible thresholding 		and logs privacy-preserving prediction metrics to detect real-world drift.
       </p>
       <ul class="tags"><li>scikit-learn</li><li>FastAPI</li><li>Docker</li><li>calibration</li><li>monitoring</li></ul>
       <p class="plinks">

@@ -165,7 +165,7 @@
       <tr><th>Probe group</th><th>accuracy</th><th>class separation</th><th>prediction sd</th></tr>
     </thead>
     <tbody>
-      <tr><td>Era controls (n = 6)</td><td>1.000</td><td>0.847</td><td>0.465</td></tr>
+      <tr><td>Era controls (n = 6)</td><td>1.000</td><td>0.846</td><td>0.465</td></tr>
       <tr><td>Modern register (n = 24)</td><td>0.833</td><td>0.317</td><td>0.219</td></tr>
       <tr><td>Held-out test set (n = 3,505)</td><td>0.980</td><td>—</td><td>—</td></tr>
     </tbody>
@@ -175,7 +175,7 @@
     <img src="assets/phishing/class_separation.svg" alt="A probability axis from zero to one with the 0.5 threshold marked. On era controls the mean prediction for legitimate mail is 0.048 and for phishing 0.894, both far from the threshold. On modern mail the means are 0.273 and 0.590, both close to it.">
     <figcaption>
       Mean predicted probability by class. On era controls the two classes sit
-      either side of the threshold with a separation of 0.847. On modern mail the
+      either side of the threshold with a separation of 0.846. On modern mail the
       separation contracts to 0.317 and both classes crowd the threshold, which is
       the region where a small change in wording alters the verdict.
     </figcaption>
@@ -237,9 +237,9 @@
   <p>
     Every request is logged as a single JSON line recording the verdict, the
     probability, the latency and the character count, never the message text.
-    The <code>/stats</code> endpoint tracks the running prediction distribution
-    against the held-out baseline, and the probe study determines what to watch
-    for. Traffic unlike the training corpus produces predictions clustered around
+    The <code>/stats</code> endpoint reports request volume, the running class
+     mix and latency, and the probe study determines what to watch for in the 
+     logged probabilities. Traffic unlike the training corpus produces predictions clustered around
     the threshold, making a rising proportion of mid-range probabilities the
     earliest available indication that the operating point requires revision.
   </p>

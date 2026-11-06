@@ -67,8 +67,8 @@
   <p>
     Four candidate model architectures were evaluated on a 90-day pre-campaign holdout window: a seasonal-naive baseline, 
     deterministic regression without covariates, a Gradient Boosted Decision Tree (LightGBM) leveraging control product features, 
-    and the Bayesian structural state-space model. Architectures incorporating control product series achieved superior out-of-sample
-     precision (MAPE 4.5%–5.1%). However, LightGBM was rejected for post-intervention counterfactual generation due to tree-based models' 
+    and a structural state-space model estimated by maximum likelihood. Architectures incorporating control product series achieved superior out-of-sample
+     precision (MAPE 4.5%–5.0%). However, LightGBM was rejected for post-intervention counterfactual generation due to tree-based models' 
      inability to extrapolate non-stationary linear trends beyond their training support.
   </p>
   
@@ -78,7 +78,7 @@
     </thead>
     <tbody>
       <tr><td><strong>Structural, controls and weekly seasonality</strong></td><td>yes</td><td><strong>493</strong></td><td><strong>4.46%</strong></td></tr>
-      <tr><td>LightGBM, controls and calendar features</td><td>yes</td><td>540</td><td>5.05%</td></tr>
+      <tr><td>LightGBM, controls and calendar features</td><td>yes</td><td>539</td><td>5.03%</td></tr>
       <tr><td>Seasonal naive, <em>t</em> − 365</td><td>no</td><td>1,903</td><td>18.04%</td></tr>
       <tr><td>Classical OLS, calendar only</td><td>no</td><td>2,021</td><td>19.53%</td></tr>
     </tbody>
@@ -86,7 +86,7 @@
   
   <p>
   The above metrics provide two readings. First, incorporating dynamic controls reduces forecasting error by approximately a factor of four, 
-  dropping MAPE from ~19% down to ~5%. Second, while gradient boosting achieves competitive out-of-sample precision (MAPE 5.05%), it remains structurally 
+  dropping MAPE from ~19% down to ~5%. Second, while gradient boosting achieves competitive out-of-sample precision (MAPE 5.03%), it remains structurally 
   invalid for counterfactual generation. Tree-based models predict constant values within each leaf, rendering them completely unable to extrapolate 
   non-stationary linear growth trends beyond their training support. Because counterfactual projection lies entirely forward in time, valid extrapolation
    is a requirement that holdout accuracy fails to capture. 
@@ -98,27 +98,27 @@
     </thead>
     <tbody>
       <tr><td><strong>True Ground Truth</strong> (sealed validation)</td><td><strong>+4.21%</strong></td><td>€75,222</td></tr>
-      <tr><td>Structural Counterfactual Model</td><td>+4.62% · 95% CI [+0.30%, +8.91%]</td><td>€82,101</td></tr>
+      <tr><td>Structural Counterfactual Model</td><td>+4.62% · 95% interval [+0.30%, +8.91%]</td><td>€82,101</td></tr>
       <tr><td>Naive Pre-Post Comparison</td><td>+44.80%</td><td>—</td></tr>
       <tr><td>Naive Year-over-Year Comparison</td><td>+43.70%</td><td>—</td></tr>
     </tbody>
   </table>
 
   <p>
-    The structural time-series estimator recovered the true treatment effect within 0.41 percentage points, with the 95% credible interval fully
+    The structural time-series estimator recovered the true treatment effect within 0.41 percentage points, with the 95% interval fully
      covering ground truth. In contrast, naive pre-post and year-over-year comparisons overestimated campaign performance tenfold (+44.8% and +43.7%).
   </p>
 
   <figure>
     <img src="assets/campaign/counterfactual.png" alt="Daily revenue with the estimated counterfactual and its 95% interval, overlaid with the true counterfactual revealed at validation.">
     <figcaption>
-      Observed revenue plotted against structural counterfactual estimates and 95% credible intervals, benchmarked against unsealed ground truth. The model was trained exclusively on pre-intervention history; target interval bounds were derived from 4,000 posterior simulation paths.
+      Observed revenue plotted against structural counterfactual estimates and their 95% intervals, benchmarked against unsealed ground truth. The model was trained exclusively on pre-intervention history; target interval bounds were derived from 4,000 paths simulated from the fitted model.
     </figcaption>
   </figure>
 
   <h2>Sensitivity Analysis &amp; Robustness Checks</h2>
 <p>
-  Evaluating estimator resilience under structural assumption violations required subjecting the pipeline to systematic falsification tests. A placebo intervention assigned to an unexposed pre-campaign period yielded an estimated uplift of +2.16% with a 95% credible interval spanning zero. This residual establishes the empirical noise floor of the state-space model, defining its minimal detectable effect size in practical deployment.
+  Evaluating estimator resilience under structural assumption violations required subjecting the pipeline to systematic falsification tests. A placebo intervention assigned to an unexposed pre-campaign period yielded an estimated uplift of +2.16% with a 95% interval spanning zero. This residual establishes the empirical noise floor of the state-space model, defining its minimal detectable effect size in practical deployment.
 </p>
 <p>
   Further diagnostic checks examined temporal alignment and control pool isolation. Intentionally misspecifying the intervention start date revealed an asymmetric sensitivity profile, where lagging the assumed onset date corrupted baseline estimation far more severely than leading it. Finally, testing for violations of the Stable Unit Treatment Value Assumption (SUTVA)—by introducing synthetic treatment contamination into a single control regressor—shifted the estimated impact by 2.4 percentage points, demonstrating the necessity of rigorous control series insulation.
@@ -126,7 +126,7 @@
 
   <h2>Field Application: Retail Promotional Campaign</h2>
   <p>
-    The validated framework was subsequently deployed to analyse a real-world intervention within the Rossmann retail dataset. Store 372 enrolled in a recurring promotional coupon programme on April 28, 2014, providing 69 pre-intervention and 66 post-intervention weeks. Control store selection was conducted strictly using pre-intervention correlation metrics ($r \ge 0.985$) to prevent post-treatment selection bias.
+    The validated framework was subsequently deployed to analyse a real-world intervention within the Rossmann retail dataset. Store 372 enrolled in a recurring promotional coupon programme on April 28, 2014, providing 69 pre-intervention and 66 post-intervention weeks. Control store selection was conducted strictly using pre-intervention correlation metrics (r ≥ 0.985) to prevent post-treatment selection bias.
   </p>
 
   <figure>
@@ -137,10 +137,10 @@
   </figure>
 
   <p>
-    Cross-validation between the custom structural model and Google’s <code>CausalImpact</code> library places the effect in positive territory under both implementations: +6.1% against a range of +2.4% to +8.2%. That range is the spread across three seeds of the same fit, which is variational rather than exact; the five controls were selected for correlation with the treated store, which leaves their coefficients weakly identified and the variational optimum initialisation-dependent. The agreement therefore supports the direction of the effect rather than its magnitude.
+    Cross-validation between the custom structural model and Google’s <code>CausalImpact</code> library places the effect in positive territory under both implementations: +6.1% against a range of +2.4% to +8.2%. That range is the spread across three seeds of the same fit, which is variational rather than exact; the five controls were selected for correlation with the treated store, which leaves their coefficients weakly identified and the variational optimum initialisation-dependent. The agreement therefore supports the direction of the effect and not its magnitude.
   </p>
   <p>
-    However, diagnostic falsification tests on historical pre-join dates revealed statistical anomalies: pre-intervention placebo runs detected systematic negative residuals (−0.14% to −2.65%), with one period excluding zero. This pattern indicates <strong>endogenous selection into treatment</strong>—meaning stores experiencing baseline revenue dips were systematically more likely to adopt the coupon programme. Furthermore, post-treatment lift did not concentrate exclusively in active coupon distribution cycles. Consequently, the estimated uplift is reported as an upper bound rather than an unconditioned causal magnitude.
+    However, diagnostic falsification tests on historical pre-join dates revealed statistical anomalies: pre-intervention placebo runs detected systematic negative residuals (−0.13% to −2.65%), with one period excluding zero. This pattern indicates <strong>endogenous selection into treatment</strong>—meaning stores experiencing baseline revenue dips were systematically more likely to adopt the coupon programme. Furthermore, post-treatment lift did not concentrate exclusively in active coupon distribution cycles. Consequently, the estimated uplift is reported as an upper bound instead of an unconditioned causal magnitude.
   </p>
 
   <h2>Reproducibility &amp; Repository Artefacts</h2>
@@ -149,11 +149,12 @@
   </p>
   
   <h2>Limitations</h2>
-	<p>While synthetic validation confirms pipeline mechanics, the data generator and structural estimator share the same model family. This creates a favorable testing environment that does not measure estimator resilience against model misspecification.</p>
+	<p>While synthetic validation confirms pipeline mechanics, the data generator and structural estimator share the same model family. This creates a favourable testing environment that does not measure estimator resilience against model misspecification.</p>
+	<p>The structural interval is derived from paths simulated with the model parameters fixed at their maximum-likelihood estimates. It therefore excludes parameter uncertainty and is likely narrower than a fully Bayesian interval, such as the credible intervals that CausalImpact reports in the field study.</p>
 	<p>Evaluating a single treated unit against five highly correlated control stores introduces collinearity, leaving individual regressor coefficients weakly identified. A single-store study also cannot cleanly separate true campaign uplift from store-specific baseline trends.</p>
 
   <h2>Future Work</h2>
-	<p>Applying regularization shrinkage priors to control coefficients would resolve collinearity and stabilize model fitting across different random seeds.</p>
+	<p>Applying regularisation shrinkage priors to control coefficients would reduce collinearity and stabilise model fitting across different random seeds.</p>
 	<p>Transitioning to a multi-unit design represents the most impact-driven extension. Evaluating multiple treated stores simultaneously allows the model to isolate true campaign uplift from store-specific temporal drift, offering a structural fix for the selection bias identified during placebo testing.</p>
 
   <p style="margin-top:2.2rem">
